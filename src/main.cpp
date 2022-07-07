@@ -13,16 +13,9 @@
 #define SERIAL_RATE 115200
 #define HC06_RATE 9600
 
-// Serial 3 is the TX RX port #3 (connect to BT)
-#define HC06 Serial3
-
 double sigAmp = 0;
 int count1 = 0;
 int count2 = 0;
-
-void updateReference(int *s, int *c, int cyclePosition);
-double takeSquareSignalSample( byte pin, int numReadings, int sampleInterval);
-
 
 void setup() {
   Serial.begin(SERIAL_RATE);
@@ -31,6 +24,20 @@ void setup() {
   HC06.println("\nTest Start\n"); 
 }
 
-void loop() { 
-  printf("test");
+void loop() {
+char telemtery[40];
+
+count1++;
+count2 = count2 + 2;
+
+sigAmp = takeSquareSignalSample( A0, 1000, 14);
+Serial.print("Amplitude is:");
+Serial.println(sigAmp);
+
+sprintf(telemtery, "%d, %d, %d, %d, %d", (int) sigAmp, analogRead(A1), analogRead(A2), analogRead(A3), analogRead(A4));
+HC06.println(telemtery);
+delay(200);
+
 }
+
+

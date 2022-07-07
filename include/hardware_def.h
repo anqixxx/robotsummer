@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 
-#define REFPIN PA3
+// Serial 3 is the TX RX port #3 (connect to BT)
+#define HC06 Serial3
 
 #endif
