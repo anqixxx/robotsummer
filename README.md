@@ -1,4 +1,4 @@
-# robotsummer
+# Team Oscillidope, Robot Summer 2022
 A repository for code created for robot summer in ENPH 259!
 
 | Header File   | Source File   | Description   |
