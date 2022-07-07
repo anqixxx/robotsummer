@@ -10,7 +10,7 @@
 #include "arm.h"
 #include "treasure.h"
 
-#define SERIAL_RATE 115200
+#define SERIAL_RATE 9600
 #define HC06_RATE 9600
 
 double sigAmp = 0;
