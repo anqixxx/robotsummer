@@ -14,8 +14,7 @@
 #define HC06_RATE 9600
 
 double sigAmp = 0;
-int count1 = 0;
-int count2 = 0;
+
 
 void setup() {
   Serial.begin(SERIAL_RATE);
@@ -27,8 +26,6 @@ void setup() {
 void loop() {
 char telemtery[40];
 
-count1++;
-count2 = count2 + 2;
 
 sigAmp = takeSquareSignalSample( A0, 1000, 14);
 Serial.print("Amplitude is:");
