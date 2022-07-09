@@ -17,76 +17,87 @@
 double sigAmp = 0;
 int count1 = 0;
 int count2 = 0;
+uint32_t dutycycle();
 
+#define test A0
+#define testLED 6
 #define PWM_FREQ1  100
-#define PWM_FREQ2  5000
+#define PWM_FREQ2  100
 
-// Initializes DUE
 DuePWM pwm( PWM_FREQ1, PWM_FREQ2 );
+uint32_t dutycycle();
+void dutyLoop();
 
 void setup() 
 {
-    // //uint32_t  pwm_duty = 32767;
-    uint32_t pwm_duty = 127; // 50% duty cycle
+    Serial.begin(SERIAL_RATE);
+    Serial.print("Hello");
 
-    pwm.setFreq1( PWM_FREQ1 );
+    pwm.setFreq1( PWM_FREQ1);
     pwm.setFreq2( PWM_FREQ2 );
 
-    // // Setup PWM Once (Up to two unique frequencies allowed
-    // //-----------------------------------------------------    
+    // Setup PWM Once (Up to two unique frequencies allowed
+    //-----------------------------------------------------    
     pwm.pinFreq1( 6 );  // Pin 6 freq set to "pwm_freq1" on clock A
-    // // pwm.pinFreq2( 7 );  // Pin 7 freq set to "pwm_freq2" on clock B
-    // // pwm.pinFreq2( 8 );  // Pin 8 freq set to "pwm_freq2" on clock B
-    // // pwm.pinFreq2( 9 );  // Pin 9 freq set to "pwm_freq2" on clock B
-      
-    // // Write PWM Duty Cycle Anytime After PWM Setup
-    // //-----------------------------------------------------    
-    pwm.pinDuty( 6, pwm_duty );  // 50% duty cycle on Pin 6
-    // // pwm.pinDuty( 7, pwm_duty );  // 50% duty cycle on Pin 7
-    // // pwm.pinDuty( 8, pwm_duty );  // 50% duty cycle on Pin 8
-    // // pwm.pinDuty( 9, pwm_duty );  // 50% duty cycle on Pin 9
-
-    delay(30000);  // 30sec Delay; PWM signal will still stream
-    
-    // // Change frequency 1 on PWM clock A to 10kHz
-    // // Change frequency 2 on PWM clock B to 20kHz
-    pwm.setFreq1( 10000 );
-    pwm.setFreq2( 20000 );
-    
-    pwm_duty = 255; // 100% duty cycle
-    pwm.pinDuty( 6, pwm_duty );  // 100% duty cycle on Pin 6
-    // // pwm.pinDuty( 7, pwm_duty );  // 100% duty cycle on Pin 7
-    // // pwm.pinDuty( 8, pwm_duty );  // 100% duty cycle on Pin 8
-    // // pwm.pinDuty( 9, pwm_duty );  // 100% duty cycle on Pin 9
-
-    // // Pin 6 should now show 10kHz and 7, 8, and 9, 20kHz respectively.
-    // // Duty cycles remain unchanged.
-    
-    delay(30000);  // 30sec Delay; PWM signal will stream new freq
-    
-    // // Force PWM Stop On All Pins
-    // //-----------------------------    
-    pwm.stop( 6 );
-    // pwm.stop( 7 );
-    // pwm.stop( 8 );
-    // pwm.stop( 9 );
+    pwm.pinFreq2( 7 );  // Pin 7 freq set to "pwm_freq2" on clock B
+    pwm.pinFreq2( 8 );  // Pin 8 freq set to "pwm_freq2" on clock B
+    pwm.pinFreq2( 9 );  // Pin 9 freq set to "pwm_freq2" on clock B
 }
 
 void loop() 
-{  
-  // uint32_t pwm_duty = 127; // 50% duty cycle
-  // pwm.setFreq1( PWM_FREQ1 );
+{ 
+  int testRead = analogRead(test);
+  // blueLoop(testRead, analogRead(A1), analogRead(A2), analogRead(A3), analogRead(A4));
+  
+  Serial.print("Analog reading is: ");
+  Serial. println();
+  Serial.print(testRead);
 
-  // pwm.pinFreq1( 6 );  // Pin 6 freq set to "pwm_freq1" on clock A
+  uint32_t pwm_duty = dutycycle();
+  Serial.print("Duty Cycle is: ");
+  Serial.print(pwm_duty);
+ Serial. println();
 
-      
-  // pwm.pinDuty( 6, pwm_duty );  // 50% duty cycle on Pin 6
+  pwm.pinDuty( 6, pwm_duty );
+  delay(1000);
+}
 
-  // delay(30000);  // 30sec Delay; PWM signal will still stream
-    
-  // pwm_duty = 255; // 100% duty cycle
-  // pwm.pinDuty( 6, pwm_duty );  // 100% duty cycle on Pin 6
-    
-  // delay(30000);  // 30sec Delay; PWM signal will stream new freq 
-  // pwm.stop( 6 );
+uint32_t dutycycle(){
+  Serial.print("Started duty cycle");
+  Serial. println();
+
+  if (  analogRead(test) < 510){
+    //Reverse
+    double scaledVal = (analogRead(test) - 510.0)*(-255.0/509.0);
+    Serial.print("Less than 510, Scaled Val is: ");
+    Serial. println();
+    Serial.print(scaledVal);
+    return  (uint32_t) scaledVal;
+
+  } else if(  analogRead(test) < 514){
+    Serial.print("0 Value");
+    return 0;
+  } else{
+    //Forward
+    double scaledVal = (analogRead(test) - 514.0)*(255.0/509.0);
+    Serial.print("More than 514, Scaled Val is: ");
+    Serial. println();
+    Serial.print(scaledVal);
+    return (uint32_t) scaledVal;
+  }
+}
+
+void dutyLoop(){
+    uint32_t pwm_duty = 0; 
+    pwm.pinDuty( 6, pwm_duty );
+    delay(1000);
+
+   pwm_duty = 100;
+   pwm.pinDuty( 6, pwm_duty); 
+   delay(1000);
+   
+   pwm_duty = 255;
+   pwm.pinDuty( 6, pwm_duty); 
+   delay(1000);
+
 }
