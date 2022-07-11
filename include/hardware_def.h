@@ -9,4 +9,10 @@
 #define SERIAL_RATE 9600
 #define HC06_RATE 9600
 
+#define motorInput A0
+#define Motor1F 6
+#define Motor1B 7
+#define PWM_FREQ1  100
+#define PWM_FREQ2  100
+
 #endif
