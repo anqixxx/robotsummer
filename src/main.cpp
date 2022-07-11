@@ -17,15 +17,15 @@
 double sigAmp = 0;
 int count1 = 0;
 int count2 = 0;
-uint32_t dutycycle();
 
 #define test A0
-#define testLED 6
+#define Motor1F 6
+#define Motor1B 7
 #define PWM_FREQ1  100
-#define PWM_FREQ2  100
+#define PWM_FREQ2  2
 
 DuePWM pwm( PWM_FREQ1, PWM_FREQ2 );
-uint32_t dutycycle();
+int dutycycle();
 void dutyLoop();
 
 void setup() 
@@ -39,7 +39,7 @@ void setup()
     // Setup PWM Once (Up to two unique frequencies allowed
     //-----------------------------------------------------    
     pwm.pinFreq1( 6 );  // Pin 6 freq set to "pwm_freq1" on clock A
-    pwm.pinFreq2( 7 );  // Pin 7 freq set to "pwm_freq2" on clock B
+    pwm.pinFreq1( 7 );  // Pin 7 freq set to "pwm_freq2" on clock B
     pwm.pinFreq2( 8 );  // Pin 8 freq set to "pwm_freq2" on clock B
     pwm.pinFreq2( 9 );  // Pin 9 freq set to "pwm_freq2" on clock B
 }
@@ -49,43 +49,67 @@ void loop()
   int testRead = analogRead(test);
   // blueLoop(testRead, analogRead(A1), analogRead(A2), analogRead(A3), analogRead(A4));
   
-  Serial.print("Analog reading is: ");
-  Serial. println();
-  Serial.print(testRead);
+  // Serial.print("Analog reading is: ");
+  // Serial. println();
+  // Serial.print(testRead);
 
-  uint32_t pwm_duty = dutycycle();
-  Serial.print("Duty Cycle is: ");
-  Serial.print(pwm_duty);
- Serial. println();
+  int pwm_duty_int = dutycycle();
+  
+  // Serial.print("Duty Cycle is: ");
+  // Serial.print(pwm_duty_int);
+  // Serial. println();
 
-  pwm.pinDuty( 6, pwm_duty );
-  delay(1000);
+  if(pwm_duty_int < 0){
+    uint32_t pwm_duty = pwm_duty_int*(-1);
+    // Serial.println();
+    // Serial.print(pwm_duty);
+
+    // Reverse
+    pwm.pinDuty( Motor1F, 0 );
+    pwm.pinDuty( Motor1B, pwm_duty );
+    // delay(1000);
+  
+  }
+  else{
+    // Forward
+    uint32_t pwm_duty = pwm_duty_int;
+    // Serial.println();
+    // Serial.print(pwm_duty);
+
+    pwm.pinDuty( Motor1F, pwm_duty );
+    pwm.pinDuty( Motor1B, 0 );
+    // delay(1000);
+  }
+  
+
 }
 
-uint32_t dutycycle(){
+int dutycycle(){
   Serial.print("Started duty cycle");
   Serial. println();
 
   if (  analogRead(test) < 510){
-    //Reverse
-    double scaledVal = (analogRead(test) - 510.0)*(-255.0/509.0);
-    Serial.print("Less than 510, Scaled Val is: ");
-    Serial. println();
-    Serial.print(scaledVal);
-    return  (uint32_t) scaledVal;
+    //Backward
+    double scaledVal = (analogRead(test) - 510.0)*(255.0/509.0);
+    // Serial.print("Less than 510, Scaled Val is: ");
+    // Serial.println();
+    // Serial.print(scaledVal);
+    return scaledVal; //uint32_t will be negative for backward
 
   } else if(  analogRead(test) < 514){
     Serial.print("0 Value");
     return 0;
+
   } else{
     //Forward
     double scaledVal = (analogRead(test) - 514.0)*(255.0/509.0);
-    Serial.print("More than 514, Scaled Val is: ");
-    Serial. println();
-    Serial.print(scaledVal);
-    return (uint32_t) scaledVal;
+    // Serial.print("More than 514, Scaled Val is: ");
+    // Serial.println();
+    // Serial.print(scaledVal);
+    return scaledVal; //uint32_t will be negative for forward
   }
 }
+
 
 void dutyLoop(){
     uint32_t pwm_duty = 0; 
@@ -99,5 +123,4 @@ void dutyLoop(){
    pwm_duty = 255;
    pwm.pinDuty( 6, pwm_duty); 
    delay(1000);
-
 }
