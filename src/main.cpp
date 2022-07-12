@@ -10,8 +10,6 @@
 #include "arm.h"
 #include "treasure.h"
 #include "bluetooth.h"
-#include "DuePWM.h"
-
 
 
 double sigAmp = 0;
@@ -22,18 +20,12 @@ void setup()
 {
     Serial.begin(SERIAL_RATE);
     Serial.print("Hello");
-
+    blueStart();
     pwm_setup();
 }
 
 void loop() 
 { 
-  int testRead = analogRead(motorInput);
-  // blueLoop(testRead, analogRead(A1), analogRead(A2), analogRead(A3), analogRead(A4));
-  
-  // Serial.print("Analog reading is: ");
-  // Serial. println();
-  // Serial.print(testRead);
-
   pwm_loop();
+  blueLoop(analogRead(motorInput), 0, 0,  0,  0);
 }

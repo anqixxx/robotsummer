@@ -10,5 +10,6 @@ int dutycycle();
 void dutyLoop();
 void pwm_setup();
 void pwm_loop();
+void drive(int speedLeft, int speedRight);
 
 #endif

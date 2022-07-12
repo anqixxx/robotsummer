@@ -4,6 +4,10 @@
 int blueCount1 = 0;
 int blueCount2 = 0;
 
+/**
+ * Sets up Bluetooth module
+ * Insert into main setup to run
+ * */
 void blueStart(){
   Serial.begin(SERIAL_RATE);
   HC06.begin(HC06_RATE);  
@@ -13,6 +17,7 @@ void blueStart(){
 
 /**
  * Takes as parameters 5 values to be plotted on the bluetooth serial monitor
+ * Insert into loop to run
  * Returns nothing
  * */
 void blueLoop(int reading1, int reading2,  int reading3,  int reading4,  int reading5){
