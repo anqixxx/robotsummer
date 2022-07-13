@@ -103,7 +103,7 @@ void drive(int speedLeft, int speedRight) {
         analogWrite(Motor1B, 0);
     } else {
         analogWrite(Motor1F, 0);
-        analogWrite(Motor1B, speedLeft);
+        analogWrite(Motor1B, -1*speedLeft);
     }
     
     if (speedRight >= 0) {
@@ -111,6 +111,6 @@ void drive(int speedLeft, int speedRight) {
         analogWrite(Motor2B, 0);   
     } else {
         analogWrite(Motor2F, 0);
-        analogWrite(Motor2B, speedRight);
+        analogWrite(Motor2B, -1*speedRight);
     }
 }
