@@ -8,16 +8,12 @@ void setupRadio();
 
 void resetData();
 
-void updateMotorPWM(int leftMotor, int rightMotor);
-
-void autoRadioLoop();
-
 int potentiometerData();
 
 int leftMotorData();
 
 int rightMotorData();
 
-bool manualOrAuto();
+bool isManual();
 
 #endif

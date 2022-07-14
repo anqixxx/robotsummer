@@ -1,5 +1,7 @@
 #include "Arduino.h"
 #include "Wire.h"
+#include <stdio.h>
+#include <stdbool.h>
 
 #include "hardware_def.h"
 #include "tape_follow.h"
@@ -9,32 +11,45 @@
 #include "claw.h"
 #include "arm.h"
 #include "treasure.h"
-
-#define SERIAL_RATE 9600
-#define HC06_RATE 9600
+#include "bluetooth.h"
+#include "DuePWM.h"
+#include "nRF24L01.h"
+#include "rc_reciever.h"
+#include "RF24.h"
+#include "RF24_config.h"
 
 double sigAmp = 0;
 
+void manualMode();
 
-void setup() {
-  Serial.begin(SERIAL_RATE);
-  HC06.begin(HC06_RATE);  
-  HC06.write("\nTest Start\n");  
-  HC06.println("\nTest Start\n"); 
+void setup() 
+{
+    Serial.begin(SERIAL_RATE);
+    Serial.print("Hello");
+    blueStart();
+    pwm_setup();
+    setupRadio();
 }
 
-void loop() {
-char telemtery[40];
+void loop() 
+{ 
 
-
-sigAmp = takeSquareSignalSample( A0, 1000, 14);
-Serial.print("Amplitude is:");
-Serial.println(sigAmp);
-
-sprintf(telemtery, "%d, %d, %d, %d, %d", (int) sigAmp, analogRead(A1), analogRead(A2), analogRead(A3), analogRead(A4));
-HC06.println(telemtery);
-delay(200);
+  rcloop();
+  //pwm_loop(); // Can this be romoved or archived for if we need DuePWM on pins 6789
+  if (isManual()){
+     Serial.println("in manual mode");
+     manualMode();
+  } else {
+     Serial.println("in auto mode");
+     // lineFollow(potentiometerData()); // poten is from 0 to 255
+  }
 
 }
 
-
+// Manual control of robot
+void manualMode(){
+  int mainLeftMotor = leftMotorData();
+  int mainRightMotor = rightMotorData();
+  drive(mainLeftMotor, mainRightMotor);
+  blueLoop(mainLeftMotor, mainRightMotor, 0,  0,  0);
+}

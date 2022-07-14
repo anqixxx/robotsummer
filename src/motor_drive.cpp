@@ -3,11 +3,36 @@
 #include "hardware_def.h"
 #include "DuePWM.h"
 
+
+
 DuePWM pwm( PWM_FREQ1, PWM_FREQ2 );
+
+
+// test speed and drive with motor
+void drive(int speedLeft, int speedRight) {
+      Serial.println("DEBUG");
+    //Take speedLeft as Motor 1, speedRight as Motor 2
+    if (speedLeft >= 0) {
+        analogWrite(L_MOTOR_FORWARD, speedLeft);
+        analogWrite(L_MOTOR_REV, 0);
+    } else {
+        analogWrite(L_MOTOR_FORWARD, 0);
+        analogWrite(L_MOTOR_REV, -1*speedLeft);
+    }
+    
+    if (speedRight >= 0) {
+        analogWrite(R_MOTOR_FORWARD, speedRight);
+        analogWrite(R_MOTOR_REV, 0);   
+    } else {
+        analogWrite(R_MOTOR_FORWARD, 0);
+        analogWrite(R_MOTOR_REV, -1*speedRight);
+    }
+
+}
 
 // Now define the main code for the functions listed in the header file
 int dutycycle(){
-  Serial.print("Started duty cycle");
+  
   Serial. println();
   double motorInVal = analogRead(motorInput);
 
@@ -95,22 +120,3 @@ void pwm_loop(){
 
 
 
-// test speed and drive with motor
-void drive(int speedLeft, int speedRight) {
-    //Take speedLeft as Motor 1, speedRight as Motor 2
-    if (speedLeft >= 0) {
-        analogWrite(Motor1F, speedLeft);
-        analogWrite(Motor1B, 0);
-    } else {
-        analogWrite(Motor1F, 0);
-        analogWrite(Motor1B, -1*speedLeft);
-    }
-    
-    if (speedRight >= 0) {
-        analogWrite(Motor2F, speedRight);
-        analogWrite(Motor2B, 0);   
-    } else {
-        analogWrite(Motor2F, 0);
-        analogWrite(Motor2B, -1*speedRight);
-    }
-}
