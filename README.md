@@ -12,6 +12,7 @@ A repository for code created for robot summer in ENPH 259!
 | claw.h | claw.cpp | Claw Functions, reacting to sensors, placement of the claw, speed of the claw, location of the claw |
 | arm.h | arm.cpp | Arm Functions, height and angle for the claw |
 | treasure.h | treasure.cpp | Treasure detecting functions, from ultrasonic sensors, hall effect sensors, and reflectance sensors |
+| bluetooth.h | bluetooth.cpp | Allows for communication between bluetooth and our Robot! (Due to this, it has access to more libraries than other source files) |
 | rc_reciever.h*  | rc_reciever.cpp*  | Allows for controlling the robot with an RC Controller, testing mode only  |
 
 * Note, will  also utlize nRF24L01.h, RF24_config.h, RF24.h, and RF24.cpp, all taken online from the TMRh20/RF24 library, https://github.com/tmrh20/RF24/

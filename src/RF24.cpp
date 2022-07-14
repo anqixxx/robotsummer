@@ -9,6 +9,8 @@
 #include "RF24_config.h"
 #include "RF24.h"
 #include <stdio.h>
+#include <stdbool.h>
+#include "hardware_def.h" // Includes all robot-specific global variables
 
 /****************************************************************************/
 
