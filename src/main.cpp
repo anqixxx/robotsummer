@@ -50,6 +50,6 @@ void loop()
 void manualMode(){
   int mainLeftMotor = leftMotorData();
   int mainRightMotor = rightMotorData();
-  drive(mainLeftMotor, mainRightMotor);
+  drive(10  , 10);
   blueLoop(mainLeftMotor, mainRightMotor, 0,  0,  0);
 }
