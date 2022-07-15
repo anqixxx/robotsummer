@@ -33,6 +33,8 @@
 #define FAST 200 // Variables for speed, test to find the one best for us
 #define SLOW 150
 
+
+
 // Tape Following Values
 #define TAPE_L A1
 #define TAPE_R A2

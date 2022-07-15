@@ -4,7 +4,6 @@
 #include "DuePWM.h"
 
 
-
 DuePWM pwm( PWM_FREQ1, PWM_FREQ2 );
 
 
@@ -59,17 +58,18 @@ int dutycycle(){
 
 
 void dutyLoop(){
-    uint32_t pwm_duty = 0; 
-    pwm.pinDuty( 6, pwm_duty );
-    delay(1000);
+  uint32_t pwm_duty = 0; 
 
-   pwm_duty = 100;
-   pwm.pinDuty( 6, pwm_duty); 
-   delay(1000);
+  pwm.pinDuty( 6, pwm_duty); 
+  delay(1000);
+
+  pwm_duty = 100;
+  pwm.pinDuty( 6, pwm_duty); 
+  delay(1000);
    
-   pwm_duty = 255;
-   pwm.pinDuty( 6, pwm_duty); 
-   delay(1000);
+  pwm_duty = 255;
+  pwm.pinDuty( 6, pwm_duty); 
+  delay(1000);
 }
 
 /**
@@ -85,6 +85,11 @@ void pwm_setup(){
     pwm.pinFreq1( 7 );  // Pin 7 freq set to "pwm_freq2" on clock B
     pwm.pinFreq2( 8 );  // Pin 8 freq set to "pwm_freq2" on clock B
     pwm.pinFreq2( 9 );  // Pin 9 freq set to "pwm_freq2" on clock B
+    pwm.pinFreq1( 2 );  // Pin 6 freq set to "pwm_freq1" on clock A
+    pwm.pinFreq2( 3 );  // Pin 8 freq set to "pwm_freq2" on clock B
+    pwm.pinFreq2( 4 );  // Pin 9 freq set to "pwm_freq2" on clock B
+    pwm.pinFreq1( 5 );  // Pin 6 freq set to "pwm_freq1" on clock A
+
 }
 
 // Insert into loop to run, used to test lights
