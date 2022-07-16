@@ -17,10 +17,10 @@
 // Motor frequencies and pins
 #define PWM_FREQ1  100
 #define PWM_FREQ2  100
-#define L_MOTOR_FORWARD 2
-#define L_MOTOR_REV 3
-#define R_MOTOR_FORWARD 4
-#define R_MOTOR_REV 5
+#define L_MOTOR_FORWARD 6
+#define L_MOTOR_REV 7
+#define R_MOTOR_FORWARD 8
+#define R_MOTOR_REV 9
 
 // Motor and PWM Values
 #define motorInput A0
@@ -30,11 +30,12 @@
 #define Motor2B 9
 #define PWM_FREQ1  100
 #define PWM_FREQ2  100
-#define FAST 200 // Variables for speed, test to find the one best for us
-#define SLOW 150
+
+#define POT1 A0
+#define POT2 A1
 
 // Tape Following Values
-#define TAPE_L A1
-#define TAPE_R A2
+#define TAPE_L A2
+#define TAPE_R A3
 
 #endif
