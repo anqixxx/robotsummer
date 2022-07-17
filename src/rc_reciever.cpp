@@ -79,7 +79,7 @@ void resetData() {
   data.pot1 = 1;
   data.pot2 = 1;
   data.tSwitch1 = 1;
-  data.tSwitch2 = 1;
+  data.tSwitch2 = 0;
   data.button1 = 1;
   data.button2 = 1;
   data.button3 = 1;

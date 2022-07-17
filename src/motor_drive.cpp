@@ -7,6 +7,20 @@
 
 DuePWM pwm( PWM_FREQ1, PWM_FREQ2 );
 
+/**
+ * Sets up PWM library and functions 
+ * Insert into main setup to run
+ * */
+void pwm_setup(){
+    pwm.setFreq1( PWM_FREQ1);
+    pwm.setFreq2( PWM_FREQ2 );
+
+    // Setup PWM Once (Up to two unique frequencies allowed
+    pwm.pinFreq1( 6 );  // Pin 6 freq set to "pwm_freq1" on clock A
+    pwm.pinFreq1( 7 );  // Pin 7 freq set to "pwm_freq1" on clock B
+    pwm.pinFreq2( 8 );  // Pin 8 freq set to "pwm_freq2" on clock B
+    pwm.pinFreq2( 9 );  // Pin 9 freq set to "pwm_freq2" on clock B
+}
 
 // test speed and drive with motor
 void drive(int speedLeft, int speedRight) {
@@ -74,20 +88,7 @@ void dutyLoop(){
    delay(1000);
 }
 
-/**
- * Sets up PWM library and functions 
- * Insert into main setup to run
- * */
-void pwm_setup(){
-    pwm.setFreq1( PWM_FREQ1);
-    pwm.setFreq2( PWM_FREQ2 );
 
-    // Setup PWM Once (Up to two unique frequencies allowed
-    pwm.pinFreq1( 6 );  // Pin 6 freq set to "pwm_freq1" on clock A
-    pwm.pinFreq1( 7 );  // Pin 7 freq set to "pwm_freq1" on clock B
-    pwm.pinFreq2( 8 );  // Pin 8 freq set to "pwm_freq2" on clock B
-    pwm.pinFreq2( 9 );  // Pin 9 freq set to "pwm_freq2" on clock B
-}
 
 // Insert into loop to run, used to test lights
 void pwm_loop(){

@@ -58,8 +58,8 @@ void loop()
   tapeRight = analogRead(TAPE_R);
 
     blueLoop(pot1, pot2, tapeLeft, tapeRight ,0);
-   //lineFollow(pot1); 
-   drive(-pot1/4, -pot2/4);    
+   lineFollow(pot1); 
+
       
 
 }
