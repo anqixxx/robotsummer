@@ -2,6 +2,8 @@
 #include "tape_follow.h"
 #include "hardware_def.h"
 #include "motor_drive.h" // until I can figure out how to compartmentalize this
+#define FAST 200 // Variables for speed, test to find the one best for us
+#define SLOW 100
 
 // Global variables for tape following
 bool onTapeL = true, onTapeR = true, lastL = true, lastR  = true;
@@ -10,8 +12,8 @@ bool onTapeL = true, onTapeR = true, lastL = true, lastR  = true;
 // Now define the main code for the functions listed in the header file
 void lineFollow(int REF_THRES){
     // Checks to see if the reflectance sensor is on tape or not
-    onTapeL = (analogRead(TAPE_L) > REF_THRES);
-    onTapeR = (analogRead(TAPE_R) > REF_THRES);
+    onTapeL = (analogRead(TAPE_L) < REF_THRES);
+    onTapeR = (analogRead(TAPE_R) < REF_THRES);
 
     if (onTapeL || onTapeR) {
         // Either sensor on tape

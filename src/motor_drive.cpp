@@ -6,26 +6,42 @@
 
 DuePWM pwm( PWM_FREQ1, PWM_FREQ2 );
 
+/**
+ * Sets up PWM library and functions 
+ * Insert into main setup to run
+ * */
+void pwm_setup(){
+    pwm.setFreq1( PWM_FREQ1);
+    pwm.setFreq2( PWM_FREQ2 );
+
+    // Setup PWM Once (Up to two unique frequencies allowed
+    pwm.pinFreq1( 6 );  // Pin 6 freq set to "pwm_freq1" on clock A
+    pwm.pinFreq1( 7 );  // Pin 7 freq set to "pwm_freq1" on clock B
+    pwm.pinFreq2( 8 );  // Pin 8 freq set to "pwm_freq2" on clock B
+    pwm.pinFreq2( 9 );  // Pin 9 freq set to "pwm_freq2" on clock B
+}
 
 // test speed and drive with motor
 void drive(int speedLeft, int speedRight) {
+  uint32_t left = speedLeft;
+  uint32_t right = speedRight;
+
     //Take speedLeft as Motor 1, speedRight as Motor 2
     if (speedLeft >= 0) {
-        analogWrite(L_MOTOR_FORWARD, speedLeft);
-        analogWrite(L_MOTOR_REV, 0);
+        pwm.pinDuty(L_MOTOR_FORWARD, left);
+        pwm.pinDuty(L_MOTOR_REV, 0);
     } else {
-        analogWrite(L_MOTOR_FORWARD, 0);
-        analogWrite(L_MOTOR_REV, -1*speedLeft);
+        pwm.pinDuty(L_MOTOR_FORWARD, 0);
+        pwm.pinDuty(L_MOTOR_REV, -1*left);
     }
     
     if (speedRight >= 0) {
-        analogWrite(R_MOTOR_FORWARD, speedRight);
-        analogWrite(R_MOTOR_REV, 0);   
+        pwm.pinDuty(R_MOTOR_FORWARD, right);
+        pwm.pinDuty(R_MOTOR_REV, 0);   
     } else {
-        analogWrite(R_MOTOR_FORWARD, 0);
-        analogWrite(R_MOTOR_REV, -1*speedRight);
+        pwm.pinDuty(R_MOTOR_FORWARD, 0);
+        pwm.pinDuty(R_MOTOR_REV, -1*right);
     }
-
 }
 
 // Now define the main code for the functions listed in the header file
@@ -72,14 +88,8 @@ void dutyLoop(){
   delay(1000);
 }
 
-/**
- * Sets up PWM library and functions 
- * Insert into main setup to run
- * */
-void pwm_setup(){
-    pwm.setFreq1( PWM_FREQ1);
-    pwm.setFreq2( PWM_FREQ2 );
 
+<<<<<<< HEAD
     // Setup PWM Once (Up to two unique frequencies allowed
     pwm.pinFreq1( 6 );  // Pin 6 freq set to "pwm_freq1" on clock A
     pwm.pinFreq1( 7 );  // Pin 7 freq set to "pwm_freq2" on clock B
@@ -91,6 +101,8 @@ void pwm_setup(){
     pwm.pinFreq1( 5 );  // Pin 6 freq set to "pwm_freq1" on clock A
 
 }
+=======
+>>>>>>> cb32ea9f380ee66203807a0615d5bbf837659d69
 
 // Insert into loop to run, used to test lights
 void pwm_loop(){

@@ -27,15 +27,23 @@ int tapeLeft;
 int tapeRight;
 
 void manualMode();
+void tapeFollow();
 
 
 
 void setup() 
 {
+<<<<<<< HEAD
   Serial.begin(SERIAL_RATE);
   Serial.print("Hello");
   blueStart();
   pwm_setup();
+=======
+    Serial.begin(SERIAL_RATE);
+    Serial.print("Hello");
+    blueStart();
+    pwm_setup();
+>>>>>>> cb32ea9f380ee66203807a0615d5bbf837659d69
   //  setupRadio();  Radio out of service
 }
 
@@ -52,14 +60,14 @@ void loop()
   //     drive(0  , 0);
   //    // lineFollow(potentiometerData()); // poten is from 0 to 255
   // }
-  
-  // pot1 = analogRead(POT1);
-  // pot1 = analogRead(POT2);
-  // tapeLeft = analogRead(TAPE_L);
-  // tapeRight = analogRead(TAPE_R);
+  pot1 = analogRead(POT1);
+  pot2 = analogRead(POT2);
+  tapeLeft = analogRead(TAPE_L);
+  tapeRight = analogRead(TAPE_R);
 
-    // blueLoop(pot1, pot2, tapeLeft, tapeRight ,0);
-      // drive( analogRead(POT1)/10 , analogRead(POT2)/10);
+    blueLoop(pot1, pot2, tapeLeft, tapeRight ,0);
+   lineFollow(pot1); 
+
       
 
 }
@@ -70,4 +78,8 @@ void manualMode(){
   int mainRightMotor = rightMotorData();
   drive(mainLeftMotor  , mainRightMotor);
   blueLoop(mainLeftMotor, mainRightMotor, 0,  0,  0);
+}
+
+void tapeFollowLoop(){
+
 }
