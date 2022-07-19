@@ -7,4 +7,8 @@
 
 //Enter in function definitions for claw movement, with the code located in claw.cpp
 
+void servo_setup();
+
+void servo_loop();
+
 #endif

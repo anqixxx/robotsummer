@@ -15,11 +15,9 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
-
-#if defined(ARDUINO_ARCH_SAM)
-
 #include <Arduino.h>
 #include <Servo.h>
+#include <ServoTimers.h>
 
 #define usToTicks(_us)    (( clockCyclesPerMicrosecond() * _us) / 32)     // converts microseconds to tick
 #define ticksToUs(_ticks) (( (unsigned)_ticks * 32)/ clockCyclesPerMicrosecond() ) // converts from ticks back to microseconds
@@ -278,5 +276,3 @@ bool Servo::attached()
 {
   return servos[this->servoIndex].Pin.isActive;
 }
-
-#endif // ARDUINO_ARCH_SAM

@@ -18,7 +18,6 @@
 #include "RF24.h"
 #include "RF24_config.h"
 
-
 double sigAmp = 0;
 
 int pot1;
