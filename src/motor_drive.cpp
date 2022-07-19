@@ -89,20 +89,6 @@ void dutyLoop(){
 }
 
 
-<<<<<<< HEAD
-    // Setup PWM Once (Up to two unique frequencies allowed
-    pwm.pinFreq1( 6 );  // Pin 6 freq set to "pwm_freq1" on clock A
-    pwm.pinFreq1( 7 );  // Pin 7 freq set to "pwm_freq2" on clock B
-    pwm.pinFreq2( 8 );  // Pin 8 freq set to "pwm_freq2" on clock B
-    pwm.pinFreq2( 9 );  // Pin 9 freq set to "pwm_freq2" on clock B
-    pwm.pinFreq1( 2 );  // Pin 6 freq set to "pwm_freq1" on clock A
-    pwm.pinFreq2( 3 );  // Pin 8 freq set to "pwm_freq2" on clock B
-    pwm.pinFreq2( 4 );  // Pin 9 freq set to "pwm_freq2" on clock B
-    pwm.pinFreq1( 5 );  // Pin 6 freq set to "pwm_freq1" on clock A
-
-}
-=======
->>>>>>> cb32ea9f380ee66203807a0615d5bbf837659d69
 
 // Insert into loop to run, used to test lights
 void pwm_loop(){

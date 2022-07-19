@@ -3,6 +3,7 @@
 #define CLAW_H
 
 #include <Arduino.h>
+#include <Servo.h>
 
 //Enter in function definitions for claw movement, with the code located in claw.cpp
 

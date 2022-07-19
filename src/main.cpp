@@ -33,17 +33,10 @@ void tapeFollow();
 
 void setup() 
 {
-<<<<<<< HEAD
-  Serial.begin(SERIAL_RATE);
-  Serial.print("Hello");
-  blueStart();
-  pwm_setup();
-=======
     Serial.begin(SERIAL_RATE);
     Serial.print("Hello");
     blueStart();
     pwm_setup();
->>>>>>> cb32ea9f380ee66203807a0615d5bbf837659d69
   //  setupRadio();  Radio out of service
 }
 
