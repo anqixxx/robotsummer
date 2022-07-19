@@ -4,7 +4,6 @@
 #include "DuePWM.h"
 
 
-
 DuePWM pwm( PWM_FREQ1, PWM_FREQ2 );
 
 /**

@@ -34,6 +34,8 @@
 #define POT1 A0
 #define POT2 A1
 
+
+
 // Tape Following Values
 #define TAPE_L A2
 #define TAPE_R A3
