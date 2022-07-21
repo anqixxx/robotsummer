@@ -2,9 +2,12 @@
 #include "Wire.h"
 #include <stdio.h>
 #include <stdbool.h>
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
 
 #include "hardware_def.h"
-#include "tape_follow.h"
+// #include "tape_follow.h"
 #include "ir_sensors.h"
 #include "motor_drive.h"
 #include "field_nav.h"
@@ -14,77 +17,188 @@
 #include "bluetooth.h"
 #include "DuePWM.h"
 #include "nRF24L01.h"
-#include "rc_reciever.h"
 #include "RF24.h"
 #include "RF24_config.h"
 
-double sigAmp = 0;
+#define FAST 70
+#define SLOW 55
 
+/*
+Radio Variables and Data Structure
+*/
+RF24 radio(CE, CNS);   // nRF24L01 (CE, CSN)
+const byte address[6] = "00001";
+unsigned long lastReceiveTime = 0;
+unsigned long currentTime = 0;
+
+// Max size of this struct is 32 bytes - NRF24L01 buffer limit
+struct Data_Package {
+  byte j1PotX;
+  byte j1PotY;
+  byte j1Button;
+  byte j2PotX;
+  byte j2PotY;
+  byte j2Button;
+  byte pot1;
+  byte pot2;
+  byte tSwitch1;
+  byte tSwitch2;
+  byte button1;
+  byte button2;
+  byte button3;
+  byte button4;
+};
+
+Data_Package data;
+
+/*
+Tape Follow Calibration
+*/
 int pot1;
 int pot2;
 int tapeLeft;
 int tapeRight;
 
+/*
+IR detection
+*/
+double sigAmp = 0;
+
+// RC Functions
+void rcloop();
+void setupRadio();
+void resetRadioData();
+
+// Robot Modes
 void manualMode();
-void tapeFollow();
-
-
+void lineFollow(int );
 
 void setup() 
 {
-    Serial.begin(SERIAL_RATE);
-    Serial.print("Hello");
-    servo_setup();
-    // blueStart();
-    // pwm_setup();
-  //  setupRadio();  Radio out of service
+  Serial.begin(SERIAL_RATE);
+  Serial.print("Hello");
+  blueStart(); // Configure Bluetooth
+  pwm_setup(); // Adjust pwm to correct frequency for the drive motors
+  setupRadio(); // Open the RC radio communications through 
 }
 
 void loop() 
 { 
-  //Reflectance
-  Serial.print("Reflectance: ");
-  Serial.print(analogRead(A1));
-  Serial.println();
-  Serial.print("Magnetic: ");
-  Serial.print(analogRead(A0));
-  Serial.println();
+  // Check RC input
+   rcloop();
+   // Right side toggle switch in up position is indicator for manual mode
+   if (data.tSwitch2 == 0){
+      manualMode();
+   } else {
 
+    // Read the relevant sensors for tape following procedure
+  pot1 = analogRead(POT1);
+  pot2 = analogRead(POT2);
+  tapeLeft = analogRead(TAPE_L);
+  tapeRight = analogRead(TAPE_R);
 
-  // sero_position(0); //close
-  // delay(6000);
-  // sero_position(180); //open
-  // delay(3000); 
-
-  //servo_loop();
-  // dutyLoop();
-  // RADIO OUT OF SERVICE
-  // rcloop();
-  // if (isManual()){
-  //    Serial.println("in manual mode");
-  //    manualMode();
-  // } else {
-  //    Serial.println("in auto mode");
-  //     drive(0  , 0);
-  //    // lineFollow(potentiometerData()); // poten is from 0 to 255
-  // }
-  // pot1 = analogRead(POT1);
-  // pot2 = analogRead(POT2);
-  // tapeLeft = analogRead(TAPE_L);
-  // tapeRight = analogRead(TAPE_R);
-  // blueLoop(pot1, pot2, tapeLeft, tapeRight ,0);
-  // lineFollow(pot1); 
+// Output sensor readings to bluetooth for debugging
+    blueLoop(pot1, pot2, tapeLeft, tapeRight ,0);
+    // Follow the line
+   lineFollow(pot1); 
+   }    
 
 }
+
+
+//TODO Move tape following back into the tape_follow.cpp file and test that it is functioning in order
+//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+// Global variables for tape following
+bool onTapeL = true, onTapeR = true, lastL = true, lastR  = true;
+
+
+// Now define the main code for the functions listed in the header file
+void lineFollow(int REF_THRES){
+    // Checks to see if the reflectance sensor is on tape or not
+    onTapeL = (analogRead(TAPE_L) > REF_THRES);
+    onTapeR = (analogRead(TAPE_R) > REF_THRES);
+
+    if (onTapeL || onTapeR) {
+        // Either sensor on tape
+        if (onTapeL && onTapeR) {
+            drive(FAST, FAST); 
+        } else if (!onTapeL && onTapeR)
+        {
+            drive(FAST, SLOW);
+        } else if (onTapeL && !onTapeR)
+        {
+            drive(SLOW, FAST);
+        }
+
+        lastL = onTapeL;
+        lastR = onTapeR;
+    }
+    else {
+        // Both sensors off tape, without updating last values until one sensor is on tape again
+        if (lastL) {
+            // Pushes back against left drift, allows for course correction
+            drive(-SLOW, FAST);
+        } else if (lastR)
+        {
+            // Pushes back against right drift, allows for course correction
+            drive(FAST, -SLOW);
+        } else
+        {
+            drive(-SLOW, -SLOW); // no way to ever get to this line
+        }  
+    }
+}
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//TODO Move tape following back into the tape_follow.cpp file and test that it is functioning in order
 
 // Manual control of robot
 void manualMode(){
-  int mainLeftMotor = leftMotorData();
-  int mainRightMotor = rightMotorData();
-  drive(mainLeftMotor  , mainRightMotor);
-  blueLoop(mainLeftMotor, mainRightMotor, 0,  0,  0);
+  //Normalize drive values to -255 to 255 range
+  int leftMotor = (data.j1PotY-128)*1.9;
+  int rightMotor = (data.j2PotY-128)*1.9;
+  drive(leftMotor  , rightMotor);
+  blueLoop(leftMotor, rightMotor, data.tSwitch2,  0,  0);
 }
 
-void tapeFollowLoop(){
-
+/*
+Radio Functions
+*/
+void rcloop() {
+  // Check whether there is data to be received
+  if (radio.available()) {
+    radio.read(&data, sizeof(Data_Package)); // Read the whole data and store it into the 'data' structure
+    lastReceiveTime = millis(); // At this moment we have received the data
+  }
+  // Check whether we keep receving data, or we have a connection between the two modules
+  currentTime = millis();
+  if ( currentTime - lastReceiveTime > 1000 ) { // If current time is more then 1 second since we have recived the last data, that means we have lost connection
+    resetRadioData(); // If connection is lost, reset the data. It prevents unwanted behavior, for example if a drone has a throttle up and we lose connection, it can keep flying unless we reset the values
+  }
+}
+void setupRadio(){
+  radio.begin();
+  radio.openReadingPipe(0, address);
+  radio.setAutoAck(false);
+  radio.setDataRate(RF24_250KBPS);
+  radio.setPALevel(RF24_PA_LOW);
+  radio.startListening(); //  Set the module as receiver
+  resetRadioData();
+  }
+void resetRadioData() {
+  // Reset the values when there is no radio connection - Set initial default values
+  data.j1PotX = 127;
+  data.j1PotY = 127;
+  data.j2PotX = 127;
+  data.j2PotY = 127;
+  data.j1Button = 1;
+  data.j2Button = 1;
+  data.pot1 = 1;
+  data.pot2 = 1;
+  data.tSwitch1 = 1;
+  data.tSwitch2 = 1;
+  data.button1 = 1;
+  data.button2 = 1;
+  data.button3 = 1;
+  data.button4 = 1;
 }
