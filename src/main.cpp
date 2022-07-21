@@ -34,14 +34,30 @@ void setup()
 {
     Serial.begin(SERIAL_RATE);
     Serial.print("Hello");
-    blueStart();
-    pwm_setup();
+    servo_setup();
+    // blueStart();
+    // pwm_setup();
   //  setupRadio();  Radio out of service
 }
 
 void loop() 
 { 
-  dutyLoop();
+  //Reflectance
+  Serial.print("Reflectance: ");
+  Serial.print(analogRead(A1));
+  Serial.println();
+  Serial.print("Magnetic: ");
+  Serial.print(analogRead(A0));
+  Serial.println();
+
+
+  // sero_position(0); //close
+  // delay(6000);
+  // sero_position(180); //open
+  // delay(3000); 
+
+  //servo_loop();
+  // dutyLoop();
   // RADIO OUT OF SERVICE
   // rcloop();
   // if (isManual()){
@@ -52,15 +68,12 @@ void loop()
   //     drive(0  , 0);
   //    // lineFollow(potentiometerData()); // poten is from 0 to 255
   // }
-  pot1 = analogRead(POT1);
-  pot2 = analogRead(POT2);
-  tapeLeft = analogRead(TAPE_L);
-  tapeRight = analogRead(TAPE_R);
-
-    blueLoop(pot1, pot2, tapeLeft, tapeRight ,0);
-   lineFollow(pot1); 
-
-      
+  // pot1 = analogRead(POT1);
+  // pot2 = analogRead(POT2);
+  // tapeLeft = analogRead(TAPE_L);
+  // tapeRight = analogRead(TAPE_R);
+  // blueLoop(pot1, pot2, tapeLeft, tapeRight ,0);
+  // lineFollow(pot1); 
 
 }
 

@@ -11,4 +11,7 @@ void servo_setup();
 
 void servo_loop();
 
+void sero_position(int position);
+
+
 #endif
