@@ -7,7 +7,7 @@
 #include <RF24.h>
 
 #include "hardware_def.h"
-// #include "tape_follow.h"
+#include "tape_follow.h"
 #include "ir_sensors.h"
 #include "motor_drive.h"
 #include "field_nav.h"
@@ -20,8 +20,6 @@
 #include "RF24.h"
 #include "RF24_config.h"
 
-#define FAST 70
-#define SLOW 55
 
 /*
 Radio Variables and Data Structure
@@ -90,67 +88,23 @@ void loop()
    if (data.tSwitch2 == 0){
       manualMode();
    } else {
-
-    // Read the relevant sensors for tape following procedure
+    // Output sensor readings to bluetooth for debuggin
+        // Read the relevant sensors for tape following procedure
   pot1 = analogRead(POT1);
   pot2 = analogRead(POT2);
   tapeLeft = analogRead(TAPE_L);
   tapeRight = analogRead(TAPE_R);
-
-// Output sensor readings to bluetooth for debugging
     blueLoop(pot1, pot2, tapeLeft, tapeRight ,0);
+
+
+
+
     // Follow the line
-   lineFollow(pot1); 
+   lineFollow(); 
    }    
 
 }
 
-
-//TODO Move tape following back into the tape_follow.cpp file and test that it is functioning in order
-//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-
-// Global variables for tape following
-bool onTapeL = true, onTapeR = true, lastL = true, lastR  = true;
-
-
-// Now define the main code for the functions listed in the header file
-void lineFollow(int REF_THRES){
-    // Checks to see if the reflectance sensor is on tape or not
-    onTapeL = (analogRead(TAPE_L) > REF_THRES);
-    onTapeR = (analogRead(TAPE_R) > REF_THRES);
-
-    if (onTapeL || onTapeR) {
-        // Either sensor on tape
-        if (onTapeL && onTapeR) {
-            drive(FAST, FAST); 
-        } else if (!onTapeL && onTapeR)
-        {
-            drive(FAST, SLOW);
-        } else if (onTapeL && !onTapeR)
-        {
-            drive(SLOW, FAST);
-        }
-
-        lastL = onTapeL;
-        lastR = onTapeR;
-    }
-    else {
-        // Both sensors off tape, without updating last values until one sensor is on tape again
-        if (lastL) {
-            // Pushes back against left drift, allows for course correction
-            drive(-SLOW, FAST);
-        } else if (lastR)
-        {
-            // Pushes back against right drift, allows for course correction
-            drive(FAST, -SLOW);
-        } else
-        {
-            drive(-SLOW, -SLOW); // no way to ever get to this line
-        }  
-    }
-}
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//TODO Move tape following back into the tape_follow.cpp file and test that it is functioning in order
 
 // Manual control of robot
 void manualMode(){

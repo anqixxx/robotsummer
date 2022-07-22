@@ -11,9 +11,9 @@
 #define HC06_RATE 9600
 
 // Pins for RC coms
-#define CE 53
-#define CNS 52
-
+#define CE 23
+#define CNS 22
+ 
 // Motor frequencies and pins
 #define PWM_FREQ1  100
 #define PWM_FREQ2  100
