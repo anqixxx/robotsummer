@@ -11,7 +11,7 @@ bool onTapeL = true, onTapeR = true, lastL = true, lastR  = true;
 
 
 // Now define the main code for the functions listed in the header file
-void lineFollow(){
+void lineFollow(int *MODE){
     // Checks to see if the reflectance sensor is on tape or not
     onTapeL = (analogRead(TAPE_L) > REF_THRES);
     onTapeR = (analogRead(TAPE_R) > REF_THRES);
@@ -46,5 +46,3 @@ void lineFollow(){
         }  
     }
 }
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//TODO Move tape following back into the tape_follow.cpp file and test that it is functioning in order

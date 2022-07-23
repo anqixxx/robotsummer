@@ -50,6 +50,12 @@ struct Data_Package {
 Data_Package data;
 
 /*
+Robot mode - Select which stage of operation the robot is in
+*/
+
+int MODE = 0;
+
+/*
 Tape Follow Calibration
 */
 int pot1;
@@ -67,9 +73,13 @@ void rcloop();
 void setupRadio();
 void resetRadioData();
 
-// Robot Modes
+// Robot Mode Selection
+void enterModeLoop();
+
+// Mode operations
 void manualMode();
-void lineFollow(int );
+void moveToTreasure1();
+
 
 void setup() 
 {
@@ -78,6 +88,8 @@ void setup()
   blueStart(); // Configure Bluetooth
   pwm_setup(); // Adjust pwm to correct frequency for the drive motors
   setupRadio(); // Open the RC radio communications through 
+
+  MODE = 0;  //Start the robot in its initial operating state from the start line
 }
 
 void loop() 
@@ -94,14 +106,44 @@ void loop()
   pot2 = analogRead(POT2);
   tapeLeft = analogRead(TAPE_L);
   tapeRight = analogRead(TAPE_R);
-    blueLoop(pot1, pot2, tapeLeft, tapeRight ,0);
+    blueLoop(pot1, pot2, tapeLeft, tapeRight ,MODE);
 
+  enterModeLoop();
+   }
+}
 
+   void enterModeLoop() {
 
+switch (MODE) {
+    case 0:
+    // Starting mode, line follow until reaching the state of 4 reflectance sensors turned off
+    // if all four are turned off, linefollow should incremend MODE to enter next state
+   lineFollow(&MODE);
+    break;
+  case 1:
+  // From the chicken wire backup to the first treasure
+   moveToTreasure1();
+    break;
+  case 2:
 
-    // Follow the line
-   lineFollow(); 
-   }    
+    break;
+  case 3:
+    
+    break;
+  case 4:
+    
+    break;
+  case 5:
+    
+    break;
+  case 6:
+   
+    break;
+  case 7:
+    
+    break;
+}
+
 
 }
 
@@ -113,6 +155,10 @@ void manualMode(){
   int rightMotor = (data.j2PotY-128)*1.9;
   drive(leftMotor  , rightMotor);
   blueLoop(leftMotor, rightMotor, data.tSwitch2,  0,  0);
+}
+
+void moveToTreasure1(){
+  Serial.println("Moving to treasure 1");
 }
 
 /*
