@@ -4,11 +4,9 @@
 #include <Arduino.h>
 
 // Serial 3 is the TX RX port #3 (connect to BT)
-#define HC06 Serial3
-
-// Serial definitions for bluetooth
+// Serial is the USB programming port
+#define SERIAL_OUT Serial
 #define SERIAL_RATE 9600
-#define HC06_RATE 9600
 
 // Pins for RC coms
 #define CE 23
@@ -34,10 +32,21 @@
 #define POT1 A0
 #define POT2 A1
 
-
-
 // Tape Following Values
 #define TAPE_L A2
 #define TAPE_R A3
+#define TAPE_FAR_L A4
+#define TAPE_FAR_R A5
+
+// IR Beacon Readings
+#define IR_BEACON A6
+#define IR_EN 24
+#define IR_S3 26
+#define IR_S2 28
+#define IR_S1 30
+#define IR_ARRAY_SIZE 8
+#define NO_BEACON_FOUND -8
+#define TOO_MANY_SIGNALS 8
+
 
 #endif
