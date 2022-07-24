@@ -60,6 +60,8 @@
 #define NO_BEACON_FOUND -8 // Flag for heading indicating that no beacon is found
 #define TOO_MANY_SIGNALS 8 // Flag for too many IR sensors being pinged by beacon
 
+#define BEACON_PID_OUTPUT_LIMIT 100 // Sets the limits for positive or negative on the PID output
+
 
 
 #endif
