@@ -79,6 +79,8 @@ void selectRobotMode();
 // Mode operations
 void manualMode();
 void moveToTreasure1();
+void captureBeacon();
+void moveToTreasure4();
 void IRReadingMode();
 
 
@@ -91,7 +93,7 @@ void setup()
   pwm_setup(); // Adjust pwm to correct frequency for the drive motors
 
 
-  MODE = 7;  //Start the robot in its initial operating state from the start line
+  MODE = 8;  //Start the robot in its initial operating state from the start line
 }
 
 void loop() 
@@ -142,16 +144,20 @@ switch (MODE) {
     
     break;
   case 6:
-   
+    captureBeacon();
     break;
   case 7:
-    IRReadingMode();
+    moveToTreasure4();
+    break;
+  case 8:
+  SERIAL_OUT.println (getHeadingToBeacon());
+    //IRReadingMode();
+    break;
+  case 9:
+    SERIAL_OUT.println("End of automation sequence");
     break;
 }
-
-
 }
-
 
 // Manual control of robot
 void manualMode(){
@@ -162,31 +168,61 @@ void manualMode(){
   outputCSV(leftMotor, rightMotor, data.tSwitch2,  0,  0);
 }
 
+
+// Move from chickenwire to treasure 1, can we hardcode this?  seems straightforward
 void moveToTreasure1(){
-  Serial.println("Moving to treasure 1");
+  SERIAL_OUT.println("Moving to treasure 1");
+  // Hardcoded sequence here
+
+  // Move to next mode after (grab treasure)
+  MODE++;
 }
 
+// capture the IR beacon and move to next mode
+void captureBeacon(){
+
+  int heading = getHeadingToBeacon();
+
+  if (heading == TOO_MANY_SIGNALS){
+    // React to having pins overloaded
+  } else if (heading == NO_BEACON_FOUND){
+    // React to no beacon found
+    searchForBeacon(RIGHT);
+  } 
+  MODE++;
+}
+
+void moveToTreasure4(){
+   if (0){
+       // Check for the end condition to indicate that treasure 4 is reached
+       MODE++;
+   } else {
+    followBeacon();
+   }
+  
+}
+
+// DEBUGGING and TESTING MODE
 void IRReadingMode(){
-int IRArrayValues[IR_ARRAY_SIZE];
-// Threshold value for IR signal being on
-int threshold = 15;
-// Direction from robot to beacon -7 to 7
-int heading;
+  
+  int IRArrayValues[IR_ARRAY_SIZE];
+  // Threshold value for IR signal being on
+  int threshold = 15;
+  // Direction from robot to beacon -7 to 7
+  int heading;
+  getIRArrayValues(IRArrayValues);
+  heading = convertToHeading(IRArrayValues, threshold);
 
-getIRArrayValues(IRArrayValues);
-heading = convertToHeading(IRArrayValues, threshold);
-
-        char telemtery[60];    
+    char telemtery[60];    
     sprintf(telemtery, "%d, %d, %d, %d, %d, %d, %d, %d, %d", 
     IRArrayValues[0], IRArrayValues[1], IRArrayValues[2], IRArrayValues[3], 
     IRArrayValues[4], IRArrayValues[5], IRArrayValues[6], IRArrayValues[7], heading);
 
     SERIAL_OUT.println(telemtery);
-
-    /*
-    * PID Response to the heading indicated goes in here to follow beacon
-    */    
+  
 }
+
+
 
 
 /*

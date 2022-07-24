@@ -5,6 +5,8 @@
 
 #include <Arduino.h>
 
-//Enter in function definitions for field navigation, with the code located in field_nav.cpp
+
+void searchForBeacon(bool dir);
+void followBeacon();
 
 #endif

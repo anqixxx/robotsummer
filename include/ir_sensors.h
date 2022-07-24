@@ -20,5 +20,9 @@ void getIRArrayValues(int[]);
 // Heading is from -7 to 7 indicating direction of beacon, negative is left, positive right
 int convertToHeading(int[], int);
 
+// Returns the heading to the beacon, heading is a value from -7 to 7 with 
+// values -8 and 8 reserved for no signal or too many signals
+int getHeadingToBeacon();
+
 
 #endif

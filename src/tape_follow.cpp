@@ -3,8 +3,7 @@
 #include "hardware_def.h"
 #include "motor_drive.h" // until I can figure out how to compartmentalize this
 #define REF_THRES 300
-#define FAST  180 // Variables for speed, test to find the one best for us
-#define SLOW 65
+
 
 // Global variables for tape following
 bool onTapeL = true, onTapeR = true, lastL = true, lastR  = true;

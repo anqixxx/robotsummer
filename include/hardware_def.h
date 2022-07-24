@@ -29,6 +29,16 @@
 #define PWM_FREQ1  100
 #define PWM_FREQ2  100
 
+// Drive Speeds
+#define FULL 255
+#define FAST  180 // Variables for speed, test to find the one best for us
+#define MEDIUM 100
+#define SLOW 65
+
+// Turning directions
+#define RIGHT 1
+#define LEFT 0
+
 #define POT1 A0
 #define POT2 A1
 
@@ -45,8 +55,11 @@
 #define IR_S2 28
 #define IR_S1 30
 #define IR_ARRAY_SIZE 8
-#define NO_BEACON_FOUND -8
-#define TOO_MANY_SIGNALS 8
+#define BEACON_THRESHHOLD 12 // Threshold value between noise and signal for beacon following
+
+#define NO_BEACON_FOUND -8 // Flag for heading indicating that no beacon is found
+#define TOO_MANY_SIGNALS 8 // Flag for too many IR sensors being pinged by beacon
+
 
 
 #endif

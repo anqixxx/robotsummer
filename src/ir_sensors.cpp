@@ -12,28 +12,10 @@ void setupIRArray(){
 }
 
 
-// Converts the filtered array values to a heading, heading is from -7 to 7 with 0 being straight ahead  
-// returns indicator value as a result if it encounters more than two pins that are above the threshold, indicating error
-int convertToHeading(int SIG[], int threshold){
-  int heading = 0;
-  // Track the condition of there being too many IR hits indicating error
-  int pinCount = 0;
-
-  for (int i = 0; i < IR_ARRAY_SIZE; i++)
-  {
-    if (SIG[i] > threshold){
-      heading += i;
-      pinCount++;
-    }
-  }
-  if (pinCount ==0){
-    return NO_BEACON_FOUND;
-  }
-  if (pinCount > 2){
-    return TOO_MANY_SIGNALS; // Too many pins active, indicate an error
-  }  
-  // The result is the single pin, or the average pin heading (divide by number of pins included)
-  return (((2*heading)/pinCount) - 7);
+int getHeadingToBeacon(){
+  int SIG[IR_ARRAY_SIZE];
+  getIRArrayValues(SIG);
+  return convertToHeading(SIG, BEACON_THRESHHOLD); 
 }
 
 /*
@@ -62,6 +44,30 @@ void getIRArrayValues(int SIG[] ){
   SIG[i]=takeSquareSignalSample(IR_BEACON, 200, 6)*sensitivityCorrection[i];
 
   }
+}
+
+// Converts the filtered array values to a heading, heading is from -7 to 7 with 0 being straight ahead  
+// returns indicator value as a result if it encounters more than two pins that are above the threshold, indicating error
+int convertToHeading(int SIG[], int threshold){
+  int heading = 0;
+  // Track the condition of there being too many IR hits indicating error
+  int pinCount = 0;
+
+  for (int i = 0; i < IR_ARRAY_SIZE; i++)
+  {
+    if (SIG[i] > threshold){
+      heading += i;
+      pinCount++;
+    }
+  }
+  if (pinCount ==0){
+    return NO_BEACON_FOUND;
+  }
+  if (pinCount > 2){
+    return TOO_MANY_SIGNALS; // Too many pins active, indicate an error
+  }  
+  // The result is the single pin, or the average pin heading (divide by number of pins included)
+  return (((2*heading)/pinCount) - 7);
 }
 
 // Set the selector pins to match a given channel integer (0-7) -- 
@@ -177,6 +183,6 @@ void updateReference(int *s, int *c, int cyclePosition){
     // Error condition
     *s = -999;
     *c = -999;
-    Serial.println("Error encountered in IR Sensing updateReference()");
+    SERIAL_OUT.println("Error encountered in IR Sensing updateReference()");
   }
 }

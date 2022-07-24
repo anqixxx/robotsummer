@@ -1,5 +1,64 @@
 // Field navigation, using reflectance, ultrasonic, etc to detect objects (other than treasure)
 #include "field_nav.h"
 #include "hardware_def.h"
+#include "motor_drive.h"
+#include "serial_coms.h"
+#include "tape_follow.h"
+#include "ir_sensors.h"
 
-// Now define the main code for the functions listed in the header file
+
+
+// Executes a search for the IR beacon until one of the sensors gets a signal
+// Set a time limit to avoid an infite loop
+void searchForBeacon(bool dir){
+    int tStart = millis(); // Start time of search
+    int tNow = 0; // Current time
+    int heading = NO_BEACON_FOUND;
+    do{
+        if (dir == RIGHT){
+            drive(MEDIUM, -MEDIUM); // Turn right
+        } else {
+            drive(-MEDIUM, MEDIUM); // Turn left
+    }
+    heading = getHeadingToBeacon();
+    tNow = millis();
+    }
+    while (heading == NO_BEACON_FOUND && (tNow-tStart) <  1000); // Stop trying after one second
+
+    if (heading == NO_BEACON_FOUND){
+        // Drive forward for 100 ms and then search again
+        tStart = millis();
+        while (tNow - tStart < 100){
+        drive(FAST,FAST);
+        tNow = millis();
+        }
+        searchForBeacon(dir);
+    }
+
+    // Now that beacon is found, home in a bit more on it at slower rotation
+    tStart = millis(); // Start time of search
+    do{
+        if (dir == RIGHT){
+            drive(SLOW, -SLOW); // Turn right
+        } else {
+            drive(-SLOW, SLOW); // Turn left
+    }
+    heading = getHeadingToBeacon();
+    tNow = millis();
+    }
+    while ((tNow-tStart) <  40); // Only rotate another 40 ms to not overshoot
+
+    // The robot should be locked onto the beacon now and ready for following
+
+}
+
+
+
+/*
+* PID beacon following based off of IR sensing array values
+* Use the heading abstraction given by ir_sensors to further abstract error definition
+* and a PID response to stay on course for beacon
+*/
+void followBeacon(){
+
+}
