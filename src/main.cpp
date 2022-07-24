@@ -192,6 +192,7 @@ void captureBeacon(){
   MODE++;
 }
 
+// Move from near treasure 3 to treasure 4 by following the beacon
 void moveToTreasure4(){
    if (0){
        // Check for the end condition to indicate that treasure 4 is reached
