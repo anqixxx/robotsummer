@@ -8,7 +8,7 @@
 bool onTapeL = true, onTapeR = true, lastL = true, lastR = true;
 
 // Now define the main code for the functions listed in the header file
-void lineFollow(int *MODE)
+void lineFollow()
 {
     // Checks to see if the reflectance sensor is on tape or not
     onTapeL = (analogRead(TAPE_L) > REF_THRES);

@@ -6,7 +6,6 @@
 #include <RF24.h>
 #include <Adafruit_SSD1306.h>
 
-
 #include "hardware_def.h"
 #include "tape_follow.h"
 #include "ir_sensors.h"
@@ -19,8 +18,6 @@
 #include "DuePWM.h"
 
 #include "PID_v1.h"
-
-
 
 /*
 Radio Variables and Data Structure
@@ -50,8 +47,6 @@ struct Data_Package
 };
 
 Data_Package data;
-
-
 
 /*
 Robot mode - Select which stage of operation the robot is in
@@ -84,6 +79,7 @@ void resetRadioData();
 
 // Robot Mode Selection
 void selectRobotMode();
+void dispMode();
 
 // Mode operations
 void manualMode();
@@ -94,12 +90,10 @@ void moveToTreasure4();
 
 // Testing Functions (TO BE REMOVED EVENTUALLY!)
 void IRReadingMode();
-void displayOLEDSample();
 
 /************************************************************************************
  **************************** S E T U P -- A N D -- L O O P *************************
-************************************************************************************/
-
+ ************************************************************************************/
 
 void setup()
 {
@@ -111,9 +105,11 @@ void setup()
   myPID.SetSampleTime(20);                                    // Set PID sample rate (value in ms)
   pwm_setup();                                                // Adjust pwm to correct frequency for the drive motors
 
-  display_handler.begin(SSD1306_SWITCHCAPVCC, 0x3C); 
+  display_handler.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   // Displays Adafruit logo by default. call clearDisplay immediately if you don't want this.
   display_handler.display();
+
+  dispMode();
 }
 
 void loop()
@@ -139,19 +135,6 @@ void loop()
   }
 }
 
-
-// Sample function to show how to write to OLED
-void displayOLEDSample()
-{
-  display_handler.clearDisplay();
-  display_handler.setTextSize(2);
-  display_handler.setTextColor(SSD1306_WHITE);
-  display_handler.setCursor(0,0);
-  display_handler.println("Hello Wurld");
-  display_handler.display();
-
-}
-
 // Robot is operated through a sequence of states, current state is MODE variable
 // select the set of functions matchingb the current operation mode
 void selectRobotMode()
@@ -162,7 +145,17 @@ void selectRobotMode()
   case 0:
     // Starting mode, line follow until reaching the state of 4 reflectance sensors turned off
     // if all four are turned off, linefollow should incremend MODE to enter next state
-    lineFollow(&MODE);
+    if (0)
+    {
+      lineFollow();
+    }
+    else
+    {
+      //Increment mode to reach next one
+      MODE++;
+      // Update display with new mode
+      dispMode();
+    }
     break;
   case 1:
     // From the chicken wire backup to the first treasure
@@ -188,13 +181,27 @@ void selectRobotMode()
     moveToTreasure4();
     break;
   case 8:
-    //SERIAL_OUT.println(getHeadingToBeacon());
-     IRReadingMode(); //debug mode
+
+    IRReadingMode(); // debug mode
     break;
   case 9:
     SERIAL_OUT.println("End of automation sequence");
     break;
   }
+}
+
+// Increment the MODE variable to enter into the next mode and update the OLED
+void dispMode()
+{
+  display_handler.clearDisplay();
+  display_handler.setTextSize(2);
+  display_handler.setTextColor(SSD1306_WHITE);
+  display_handler.setCursor(0, 0);
+  display_handler.println("MODE:");
+  display_handler.setTextSize(5);
+  display_handler.println(MODE);
+  display_handler.display();
+
 }
 
 // Manual control of robot, allows drive control and MODE select
@@ -211,16 +218,16 @@ void manualMode()
   if (data.button1 == 0)
   {
     MODE++;
-    delay(50); // crappy version of debounce
+    dispMode();
   }
   else if (data.button2 == 0)
   {
     MODE--;
-    delay(50); // crappy version of debounce
+    dispMode();
   }
 }
 
-// Move from chickenwire to treasure 1, can we hardcode this?  seems straightforward
+// Move from main course to treasure 1, can we hardcode this?  seems straightforward
 void moveToTreasure1()
 {
   SERIAL_OUT.println("Moving to treasure 1");
@@ -274,7 +281,7 @@ void moveToTreasure4()
 
 void followBeacon(int heading)
 {
-  pidSetpoint = heading;           // 0 is the heading towards the beacon
+  pidSetpoint = heading;                                                                     // 0 is the heading towards the beacon
   pidInput = getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS); // Use the heading offset from beacon as the input
   pot1 = analogRead(POT1) / 10;
   pot2 = analogRead(POT2) / 10;

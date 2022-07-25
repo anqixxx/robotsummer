@@ -67,7 +67,7 @@
 #define IR_S2 28
 #define IR_S1 30
 #define IR_ARRAY_SIZE 8
-#define BEACON_THRESHHOLD 12 // Threshold value between noise and signal for beacon following
+#define BEACON_THRESHHOLD 15 // Threshold value between noise and signal for beacon following
 
 #define NO_BEACON_FOUND -8 // Flag for heading indicating that no beacon is found
 #define TOO_MANY_SIGNALS 8 // Flag for too many IR sensors being pinged by beacon

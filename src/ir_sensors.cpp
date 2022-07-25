@@ -66,7 +66,7 @@ int convertToHeading(int SIG[], int threshold)
   {
     return NO_BEACON_FOUND;
   }
-  if (pinCount > 2)
+  if (pinCount > 3)
   {
     return TOO_MANY_SIGNALS; // Too many pins active, indicate an error
   }
