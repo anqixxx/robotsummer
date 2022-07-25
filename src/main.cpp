@@ -3,8 +3,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <SPI.h>
-#include <nRF24L01.h>
 #include <RF24.h>
+#include <Adafruit_SSD1306.h>
+
 
 #include "hardware_def.h"
 #include "tape_follow.h"
@@ -16,10 +17,10 @@
 #include "treasure.h"
 #include "serial_coms.h"
 #include "DuePWM.h"
-#include "nRF24L01.h"
-#include "RF24.h"
-#include "RF24_config.h"
+
 #include "PID_v1.h"
+
+
 
 /*
 Radio Variables and Data Structure
@@ -50,18 +51,12 @@ struct Data_Package
 
 Data_Package data;
 
+
+
 /*
 Robot mode - Select which stage of operation the robot is in
 */
 int MODE;
-
-/*
-Tape Follow Calibration
-*/
-int pot1;
-int pot2;
-int tapeLeft;
-int tapeRight;
 
 /*
 IR PID Controller and variables
@@ -70,6 +65,17 @@ IR PID Controller and variables
 double pidSetpoint, pidInput, pidOutput;
 // Specify the links and initial tuning parameters
 PID myPID(&pidInput, &pidOutput, &pidSetpoint, 2, 0, 0, DIRECT);
+
+// OLED handler
+Adafruit_SSD1306 display_handler(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+/*
+Tape Follow Calibration
+*/
+int pot1;
+int pot2;
+int tapeLeft;
+int tapeRight;
 
 // RC Functions
 void rcloop();
@@ -85,16 +91,29 @@ void moveToTreasure1();
 void captureBeacon();
 void followBeacon(int);
 void moveToTreasure4();
+
+// Testing Functions (TO BE REMOVED EVENTUALLY!)
 void IRReadingMode();
+void displayOLEDSample();
+
+/************************************************************************************
+ **************************** S E T U P -- A N D -- L O O P *************************
+************************************************************************************/
+
 
 void setup()
 {
-  MODE = 7; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+  MODE = 8; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
   setupSerialPort();
-  setupRadio();                                                             // Open the RC radio communications
-  setupIRArray();                                                           // Setup the logic pins for the IR Array
-  myPID.SetOutputLimits(-BEACON_PID_OUTPUT_LIMIT, BEACON_PID_OUTPUT_LIMIT); // Set the limits for the PID output values
-  pwm_setup();                                                              // Adjust pwm to correct frequency for the drive motors
+  setupRadio();                                               // Open the RC radio communications
+  setupIRArray();                                             // Setup the logic pins for the IR Array
+  myPID.SetOutputLimits(-PID_OUTPUT_LIMIT, PID_OUTPUT_LIMIT); // Set the limits for the PID output values
+  myPID.SetSampleTime(20);                                    // Set PID sample rate (value in ms)
+  pwm_setup();                                                // Adjust pwm to correct frequency for the drive motors
+
+  display_handler.begin(SSD1306_SWITCHCAPVCC, 0x3C); 
+  // Displays Adafruit logo by default. call clearDisplay immediately if you don't want this.
+  display_handler.display();
 }
 
 void loop()
@@ -110,14 +129,27 @@ void loop()
   {
     // Output sensor readings to bluetooth for debuggin
     // Read the relevant sensors for tape following procedure
-    pot1 = analogRead(POT1);
-    pot2 = analogRead(POT2);
-    tapeLeft = analogRead(TAPE_L);
-    tapeRight = analogRead(TAPE_R);
+    // pot1 = analogRead(POT1);
+    // pot2 = analogRead(POT2);
+    // tapeLeft = analogRead(TAPE_L);
+    // tapeRight = analogRead(TAPE_R);
     // outputCSV(pot1, pot2, tapeLeft, tapeRight ,MODE);
 
     selectRobotMode();
   }
+}
+
+
+// Sample function to show how to write to OLED
+void displayOLEDSample()
+{
+  display_handler.clearDisplay();
+  display_handler.setTextSize(2);
+  display_handler.setTextColor(SSD1306_WHITE);
+  display_handler.setCursor(0,0);
+  display_handler.println("Hello Wurld");
+  display_handler.display();
+
 }
 
 // Robot is operated through a sequence of states, current state is MODE variable
@@ -157,7 +189,7 @@ void selectRobotMode()
     break;
   case 8:
     SERIAL_OUT.println(getHeadingToBeacon());
-    // IRReadingMode(); debug mode
+     IRReadingMode(); //debug mode
     break;
   case 9:
     SERIAL_OUT.println("End of automation sequence");
@@ -165,7 +197,7 @@ void selectRobotMode()
   }
 }
 
-// Manual control of robot
+// Manual control of robot, allows drive control and MODE select
 void manualMode()
 {
   // Normalize drive values to -255 to 255 range
@@ -179,6 +211,12 @@ void manualMode()
   if (data.button1 == 0)
   {
     MODE++;
+    delay(50); // crappy version of debounce
+  }
+  else if (data.button2 == 0)
+  {
+    MODE--;
+    delay(50); // crappy version of debounce
   }
 }
 

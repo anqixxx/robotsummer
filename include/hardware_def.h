@@ -8,6 +8,11 @@
 #define SERIAL_OUT Serial
 #define SERIAL_RATE 9600
 
+// OLED Display
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+#define OLED_RESET 	-1 // This display does not have a reset pin accessible
+
 // Pins for RC coms
 #define CE 23
 #define CNS 22
@@ -60,7 +65,7 @@
 #define NO_BEACON_FOUND -8 // Flag for heading indicating that no beacon is found
 #define TOO_MANY_SIGNALS 8 // Flag for too many IR sensors being pinged by beacon
 
-#define BEACON_PID_OUTPUT_LIMIT 100 // Sets the limits for positive or negative on the PID output
+#define PID_OUTPUT_LIMIT 100 // Sets the limits for positive or negative on the PID output
 
 
 

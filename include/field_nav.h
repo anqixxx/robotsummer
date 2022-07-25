@@ -5,8 +5,8 @@
 
 #include <Arduino.h>
 
-
+// Search for an IR beacon by spinning in a direction, input RIGHT for right and LEFT for left
 void searchForBeacon(bool dir);
-void followBeacon();
+
 
 #endif

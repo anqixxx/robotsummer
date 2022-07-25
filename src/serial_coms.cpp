@@ -1,7 +1,7 @@
 #include "serial_coms.h"
 #include "hardware_def.h"
 
-
+// Setup the serial port indicated in hardware defs SRIAL_OUT
 void setupSerialPort(){
   SERIAL_OUT.begin(SERIAL_RATE);
   SERIAL_OUT.print("Serial port opened");
@@ -17,4 +17,10 @@ void outputCSV(int reading1, int reading2,  int reading3,  int reading4,  int re
     
     sprintf(telemtery, "%d, %d, %d, %d, %d", reading1, reading2, reading3, reading4, reading5);
     SERIAL_OUT.println(telemtery);
+}
+
+
+// Setup the SSDD_1306 display for coms
+void setupOLED(){
+  
 }

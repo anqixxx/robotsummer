@@ -53,12 +53,3 @@ void searchForBeacon(bool dir){
 }
 
 
-
-/*
-* PID beacon following based off of IR sensing array values
-* Use the heading abstraction given by ir_sensors to further abstract error definition
-* and a PID response to stay on course for beacon
-*/
-void followBeacon(){
-
-}
