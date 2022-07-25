@@ -188,7 +188,7 @@ void selectRobotMode()
     moveToTreasure4();
     break;
   case 8:
-    SERIAL_OUT.println(getHeadingToBeacon());
+    //SERIAL_OUT.println(getHeadingToBeacon());
      IRReadingMode(); //debug mode
     break;
   case 9:
@@ -234,7 +234,7 @@ void moveToTreasure1()
 void captureBeacon()
 {
 
-  int heading = getHeadingToBeacon();
+  int heading = getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS);
 
   if (heading == TOO_MANY_SIGNALS)
   {
@@ -275,7 +275,7 @@ void moveToTreasure4()
 void followBeacon(int heading)
 {
   pidSetpoint = heading;           // 0 is the heading towards the beacon
-  pidInput = getHeadingToBeacon(); // Use the heading offset from beacon as the input
+  pidInput = getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS); // Use the heading offset from beacon as the input
   pot1 = analogRead(POT1) / 10;
   pot2 = analogRead(POT2) / 10;
 
@@ -296,7 +296,7 @@ void IRReadingMode()
   int threshold = 15;
   // Direction from robot to beacon -7 to 7
   int heading;
-  getIRArrayValues(IRArrayValues);
+  getIRArrayValues(IRArrayValues, TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS);
   heading = convertToHeading(IRArrayValues, threshold);
 
   char telemtery[60];

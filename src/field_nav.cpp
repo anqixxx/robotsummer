@@ -20,7 +20,8 @@ void searchForBeacon(bool dir){
         } else {
             drive(-MEDIUM, MEDIUM); // Turn left
     }
-    heading = getHeadingToBeacon();
+    // get heading to 10khz
+    heading = getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS);
     tNow = millis();
     }
     while (heading == NO_BEACON_FOUND && (tNow-tStart) <  1000); // Stop trying after one second
@@ -43,7 +44,7 @@ void searchForBeacon(bool dir){
         } else {
             drive(-SLOW, SLOW); // Turn left
     }
-    heading = getHeadingToBeacon();
+    heading = getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS);
     tNow = millis();
     }
     while ((tNow-tStart) <  40); // Only rotate another 40 ms to not overshoot

@@ -54,6 +54,13 @@
 #define TAPE_FAR_R A5
 
 // IR Beacon Readings
+#define TEN_KHZ 100  // period of 10khz in us
+#define ONE_KHZ 1000  // period of 1khz in us
+#define TEN_KHZ_READINGS 300
+#define ONE_KHZ_READINGS 1000
+#define SAMPLE_PERIOD 7       // 7 us sample period by default
+#define STANDARD_OFFSETS 6    // number of parallel dot products
+
 #define IR_BEACON A6
 #define IR_EN 24
 #define IR_S3 26
