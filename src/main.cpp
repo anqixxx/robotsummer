@@ -85,6 +85,7 @@ void moveToTreasure4();
 
 // Testing Functions (TO BE REMOVED EVENTUALLY!)
 void IRReadingMode();
+void UltrasonicTesting();
 
 /************************************************************************************
  **************************** S E T U P -- A N D -- L O O P *************************
@@ -97,9 +98,11 @@ int MODE = 1; // Start the robot in its initial operating state from the start l
 
 void setup()
 {
+  MODE = 2; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
   setupSerialPort();
   setupRadio();                                               // Open the RC radio communications
   setupIRArray();                                             // Setup the logic pins for the IR Array
+  ultra_setup();                                              // Sets up sonars
   myPID.SetOutputLimits(-PID_OUTPUT_LIMIT, PID_OUTPUT_LIMIT); // Set the limits for the PID output values
   myPID.SetSampleTime(20);                                    // Set PID sample rate (value in ms)
   pwm_setup();                                                // Adjust pwm to correct frequency for the drive motors
@@ -160,7 +163,7 @@ void selectRobotMode()
     moveToTreasure1();
     break;
   case 2:
-
+    UltrasonicTesting();
     break;
   case 3:
 
@@ -314,6 +317,11 @@ void IRReadingMode()
           IRArrayValues[4], IRArrayValues[5], IRArrayValues[6], IRArrayValues[7], heading);
   SERIAL_OUT.println(telemtery);
 }
+
+void UltrasonicTesting(){
+ ultra_loop();
+}
+
 
 /*
 Radio Functions

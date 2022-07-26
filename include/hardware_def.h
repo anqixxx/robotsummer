@@ -20,10 +20,10 @@
 // Motor frequencies and pins
 #define PWM_FREQ1  100
 #define PWM_FREQ2  100
-#define L_MOTOR_FORWARD 6
-#define L_MOTOR_REV 7
-#define R_MOTOR_FORWARD 8
-#define R_MOTOR_REV 9
+#define L_MOTOR_FORWARD 6 // PMW
+#define L_MOTOR_REV 7 // PMW
+#define R_MOTOR_FORWARD 8 // PMW
+#define R_MOTOR_REV 9 // PMW
 
 
 // Drive Speeds
@@ -67,5 +67,10 @@
 #define PID_OUTPUT_LIMIT 100 // Sets the limits for positive or negative on the PID output
 
 
+
+// Claw Values
+#define CLAW_SERVO 4 // PMW Pin
+#define CLAW_REF A4
+#define CLAW_MAG A5
 
 #endif
