@@ -1,7 +1,6 @@
 #include "ir_sensors.h"
 #include "hardware_def.h"
 
-
 // Correction factor to account for different sensitivities in the phototransistor responses
 double sensitivityCorrection[IR_ARRAY_SIZE] = {1.04, 1.06, 1.05, 1, 0.87, 1.14, 1, 1.02};
 
@@ -18,7 +17,7 @@ int getHeadingToBeacon(int FREQ_PERIOD, int NUM_READINGS, int SAMPLE_INTERVAL, i
 {
   int SIG[IR_ARRAY_SIZE];
   getIRArrayValues(SIG, FREQ_PERIOD, NUM_READINGS, SAMPLE_INTERVAL, NUM_OFFSETS);
-  return convertToHeading(SIG, BEACON_THRESHHOLD);
+  return convertToHeading(SIG);
 }
 
 /*
@@ -48,11 +47,19 @@ void getIRArrayValues(int SIG[], int FREQ_PERIOD, int NUM_READINGS, int SAMPLE_I
 
 // Converts the filtered array values to a heading, heading is from -7 to 7 with 0 being straight ahead
 // returns indicator value as a result if it encounters more than two pins that are above the threshold, indicating error
-int convertToHeading(int SIG[], int threshold)
+int convertToHeading(int SIG[])
 {
+  int threshold = 15;
   int heading = 0;
   // Track the condition of there being too many IR hits indicating error
   int pinCount = 0;
+
+  threshold = getThreshold(SIG);
+
+  for (int i = 0; i < IR_ARRAY_SIZE; i++)
+  {
+    /* code */
+  }
 
   for (int i = 0; i < IR_ARRAY_SIZE; i++)
   {
@@ -72,6 +79,35 @@ int convertToHeading(int SIG[], int threshold)
   }
   // The result is the single pin, or the average pin heading (divide by number of pins included)
   return (((2 * heading) / pinCount) - 7);
+}
+
+// Define a lower threshold at which the IR is considered on or off the beacon
+// threshold is a dynamic value and needs to be recalculated for each reading
+int getThreshold(int SIG[])
+{
+  int threshold = 0;
+
+  // Sort the array low to high
+  int i, j, min, temp;
+  for (i = 0; i < IR_ARRAY_SIZE - 1; i++)
+  {
+    min = i;
+    for (j = i + 1; j < IR_ARRAY_SIZE; j++)
+      if (SIG[j] < SIG[min])
+        min = j;
+    temp = SIG[i];
+    SIG[i] = SIG[min];
+    SIG[min] = temp;
+  }
+
+  // Find average of four minimum values
+  for (i = 0; i < IR_ARRAY_SIZE/2; i++){
+    threshold += SIG[i];
+  }
+  threshold = threshold/(IR_ARRAY_SIZE/2);
+
+  // The threshold is three times the average minimum value of the array
+  return threshold*3;
 }
 
 // Set the selector pins to match a given channel integer (0-7) --
@@ -107,9 +143,9 @@ double takeSquareSignalSample(byte pin, int FREQ_PERIOD, int NUM_READINGS, int S
   int i = 0;             // index of reading
   int cyclePosition = 0; // position of sample in a 100us cycle (corresponding to 10kHz)
 
-  double dotProd[NUM_OFFSETS]; // accumulators to store dot product
-  int sampleMult[NUM_OFFSETS]; // The corelations corresponding to reference for each stream
-  int phaseOffsets[NUM_OFFSETS]; // The amount of phase offset from 0 
+  double dotProd[NUM_OFFSETS];   // accumulators to store dot product
+  int sampleMult[NUM_OFFSETS];   // The corelations corresponding to reference for each stream
+  int phaseOffsets[NUM_OFFSETS]; // The amount of phase offset from 0
 
   // Calculate the phase offset values to spread the total evenly within the first half of sample period
   // of the desired frequency
@@ -122,8 +158,8 @@ double takeSquareSignalSample(byte pin, int FREQ_PERIOD, int NUM_READINGS, int S
   // For 4 offsets for example, the phase offset and multipliers are as follows for a 100us period signal:
   /*
   // 1st sample multiplier (correlation to expected 0  phase signal) -> 0
-  // 2nd sample multiplier (correlation to expected 12 phase offset signal) 
-  // 3rd sample multiplier (correlation to expected 25 phase offset signal) 
+  // 2nd sample multiplier (correlation to expected 12 phase offset signal)
+  // 3rd sample multiplier (correlation to expected 25 phase offset signal)
   // 4th sample multiplier (correlation to expected 37 phase offset signal)
   */
 
@@ -136,13 +172,13 @@ double takeSquareSignalSample(byte pin, int FREQ_PERIOD, int NUM_READINGS, int S
     int32_t tNow = micros(); // us; time now
     if (tNow - tStart >= SAMPLE_INTERVAL)
     {
-      tStart += SAMPLE_INTERVAL;              // reset start time to take next sample at exactly the correct pd
-      readVal = analogRead(pin);             // Read value
+      tStart += SAMPLE_INTERVAL;                     // reset start time to take next sample at exactly the correct pd
+      readVal = analogRead(pin);                     // Read value
       cyclePosition = (tNow - tbegin) % FREQ_PERIOD; // Account for the shift on the 10khz wave signal so far
-                                             // Take mod 100 to normalize back into standard period domain [0,99]us
+                                                     // Take mod 100 to normalize back into standard period domain [0,99]us
 
       // Update the correlation to the reference signal based on the cycle position for all phase offsets
-      updateReferences(sampleMult, phaseOffsets,FREQ_PERIOD, NUM_OFFSETS, cyclePosition);
+      updateReferences(sampleMult, phaseOffsets, FREQ_PERIOD, NUM_OFFSETS, cyclePosition);
 
       // Perform the next step of the concurrent dot products (one for each offset amount)
       for (int j = 0; j < NUM_OFFSETS; j++)

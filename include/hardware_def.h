@@ -5,7 +5,7 @@
 
 // Serial 3 is the TX RX port #3 (connect to BT)
 // Serial is the USB programming port
-#define SERIAL_OUT Serial
+#define SERIAL_OUT Serial3
 #define SERIAL_RATE 9600
 
 // OLED Display
@@ -25,20 +25,12 @@
 #define R_MOTOR_FORWARD 8
 #define R_MOTOR_REV 9
 
-// Motor and PWM Values
-#define motorInput A0
-#define Motor1F 6
-#define Motor1B 7
-#define Motor2F 8
-#define Motor2B 9
-#define PWM_FREQ1  100
-#define PWM_FREQ2  100
 
 // Drive Speeds
 #define FULL 255
-#define FAST  180 // Variables for speed, test to find the one best for us
+#define FAST  160 // Variables for speed, test to find the one best for us
 #define MEDIUM 100
-#define SLOW 65
+#define SLOW 70
 
 // Turning directions
 #define RIGHT 1
@@ -48,8 +40,8 @@
 #define POT2 A1
 
 // Tape Following Values
-#define TAPE_L A2
-#define TAPE_R A3
+#define TAPE_L A11
+#define TAPE_R A10
 #define TAPE_FAR_L A4
 #define TAPE_FAR_R A5
 

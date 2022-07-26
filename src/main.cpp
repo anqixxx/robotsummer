@@ -48,10 +48,7 @@ struct Data_Package
 
 Data_Package data;
 
-/*
-Robot mode - Select which stage of operation the robot is in
-*/
-int MODE;
+
 
 /*
 IR PID Controller and variables
@@ -69,8 +66,6 @@ Tape Follow Calibration
 */
 int pot1;
 int pot2;
-int tapeLeft;
-int tapeRight;
 
 // RC Functions
 void rcloop();
@@ -95,9 +90,13 @@ void IRReadingMode();
  **************************** S E T U P -- A N D -- L O O P *************************
  ************************************************************************************/
 
+/*
+Robot mode - Select which stage of operation the robot is in
+*/
+int MODE = 1; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+
 void setup()
 {
-  MODE = 8; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
   setupSerialPort();
   setupRadio();                                               // Open the RC radio communications
   setupIRArray();                                             // Setup the logic pins for the IR Array
@@ -105,11 +104,10 @@ void setup()
   myPID.SetSampleTime(20);                                    // Set PID sample rate (value in ms)
   pwm_setup();                                                // Adjust pwm to correct frequency for the drive motors
 
-  display_handler.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-  // Displays Adafruit logo by default. call clearDisplay immediately if you don't want this.
-  display_handler.display();
-
-  dispMode();
+  display_handler.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Turn on OLED
+  display_handler.display();                         // Display logo
+  delay(100);                                        // Allow logo to flash before
+  dispMode();                                        // Display the operation mode of robot on OLED
 }
 
 void loop()
@@ -123,13 +121,6 @@ void loop()
   }
   else
   {
-    // Output sensor readings to bluetooth for debuggin
-    // Read the relevant sensors for tape following procedure
-    // pot1 = analogRead(POT1);
-    // pot2 = analogRead(POT2);
-    // tapeLeft = analogRead(TAPE_L);
-    // tapeRight = analogRead(TAPE_R);
-    // outputCSV(pot1, pot2, tapeLeft, tapeRight ,MODE);
 
     selectRobotMode();
   }
@@ -144,17 +135,24 @@ void selectRobotMode()
   {
   case 0:
     // Starting mode, line follow until reaching the state of 4 reflectance sensors turned off
-    // if all four are turned off, linefollow should incremend MODE to enter next state
+    // if all four are turned off or some other trigger
     if (0)
     {
-      lineFollow();
-    }
-    else
-    {
-      //Increment mode to reach next one
+      // Increment mode to reach next one
       MODE++;
       // Update display with new mode
       dispMode();
+    }
+    else
+    {
+
+      
+      //Debug protocol
+      outputCSV(analogRead(TAPE_L), analogRead(TAPE_R), data.pot1 ,data.pot2 ,0);
+
+      // Follow line
+      lineFollow();
+
     }
     break;
   case 1:
@@ -181,7 +179,7 @@ void selectRobotMode()
     moveToTreasure4();
     break;
   case 8:
-
+    //outputCSV(getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS),getHeadingToBeacon(ONE_KHZ, ONE_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS),0,0,0);
     IRReadingMode(); // debug mode
     break;
   case 9:
@@ -201,7 +199,6 @@ void dispMode()
   display_handler.setTextSize(5);
   display_handler.println(MODE);
   display_handler.display();
-
 }
 
 // Manual control of robot, allows drive control and MODE select
@@ -215,14 +212,20 @@ void manualMode()
 
   // Use button 1 to increment MODE to start robot in desired state
   // When automatic drive is toggled
-  if (data.button1 == 0)
+  if (data.button2 == 0)
   {
     MODE++;
+    resetRadioData();
+    delay(100);
+    setupRadio();
     dispMode();
   }
-  else if (data.button2 == 0)
+  else if (data.button1 == 0)
   {
     MODE--;
+    resetRadioData();
+    delay(100);
+    setupRadio();
     dispMode();
   }
 }
@@ -283,13 +286,13 @@ void followBeacon(int heading)
 {
   pidSetpoint = heading;                                                                     // 0 is the heading towards the beacon
   pidInput = getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS); // Use the heading offset from beacon as the input
-  pot1 = analogRead(POT1) / 10;
-  pot2 = analogRead(POT2) / 10;
+  pot1 = data.pot1 / 2;
+  pot2 = data.pot2 / 2;
 
   myPID.SetTunings(pot1, pot2, 0); // Set the P and I using the two potentiometers for tuning
   myPID.Compute();                 // This will update the pidOutput variable that is linked to myPID
 
-  outputCSV(pot1, pot2, pidInput, (int)pidSetpoint, (int)pidOutput);
+  outputCSV(pot1, pot2, pidInput, (int)pidSetpoint, (int)pidOutput); // Debugging information
 
   drive(MEDIUM - pidOutput, MEDIUM + pidOutput); // Use the PID output as a wheel speed differential
 }
@@ -299,12 +302,11 @@ void IRReadingMode()
 {
 
   int IRArrayValues[IR_ARRAY_SIZE];
-  // Threshold value for IR signal being on
-  int threshold = 15;
+
   // Direction from robot to beacon -7 to 7
   int heading;
   getIRArrayValues(IRArrayValues, TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS);
-  heading = convertToHeading(IRArrayValues, threshold);
+  heading = convertToHeading(IRArrayValues);
 
   char telemtery[60];
   sprintf(telemtery, "%d, %d, %d, %d, %d, %d, %d, %d, %d",
