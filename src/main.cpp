@@ -3,36 +3,33 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <SPI.h>
-#include <nRF24L01.h>
 #include <RF24.h>
+#include <Adafruit_SSD1306.h>
 
 #include "hardware_def.h"
-// #include "tape_follow.h"
+#include "tape_follow.h"
 #include "ir_sensors.h"
 #include "motor_drive.h"
 #include "field_nav.h"
 #include "claw.h"
 #include "arm.h"
 #include "treasure.h"
-#include "bluetooth.h"
+#include "serial_coms.h"
 #include "DuePWM.h"
-#include "nRF24L01.h"
-#include "RF24.h"
-#include "RF24_config.h"
 
-#define FAST 70
-#define SLOW 55
+#include "PID_v1.h"
 
 /*
 Radio Variables and Data Structure
 */
-RF24 radio(CE, CNS);   // nRF24L01 (CE, CSN)
+RF24 radio(CE, CNS); // nRF24L01 (CE, CSN)
 const byte address[6] = "00001";
 unsigned long lastReceiveTime = 0;
 unsigned long currentTime = 0;
 
 // Max size of this struct is 32 bytes - NRF24L01 buffer limit
-struct Data_Package {
+struct Data_Package
+{
   byte j1PotX;
   byte j1PotY;
   byte j1Button;
@@ -52,6 +49,22 @@ struct Data_Package {
 Data_Package data;
 
 /*
+Robot mode - Select which stage of operation the robot is in
+*/
+int MODE;
+
+/*
+IR PID Controller and variables
+*/
+// Global variables for the setpoint, input and output
+double pidSetpoint, pidInput, pidOutput;
+// Specify the links and initial tuning parameters
+PID myPID(&pidInput, &pidOutput, &pidSetpoint, 2, 0, 0, DIRECT);
+
+// OLED handler
+Adafruit_SSD1306 display_handler(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+/*
 Tape Follow Calibration
 */
 int pot1;
@@ -59,124 +72,267 @@ int pot2;
 int tapeLeft;
 int tapeRight;
 
-/*
-IR detection
-*/
-double sigAmp = 0;
-
 // RC Functions
 void rcloop();
 void setupRadio();
 void resetRadioData();
 
-// Robot Modes
+// Robot Mode Selection
+void selectRobotMode();
+void dispMode();
+
+// Mode operations
 void manualMode();
-void lineFollow(int );
+void moveToTreasure1();
+void captureBeacon();
+void followBeacon(int);
+void moveToTreasure4();
 
-void setup() 
+// Testing Functions (TO BE REMOVED EVENTUALLY!)
+void IRReadingMode();
+
+/************************************************************************************
+ **************************** S E T U P -- A N D -- L O O P *************************
+ ************************************************************************************/
+
+void setup()
 {
-  Serial.begin(SERIAL_RATE);
-  Serial.print("Hello");
-  blueStart(); // Configure Bluetooth
-  pwm_setup(); // Adjust pwm to correct frequency for the drive motors
-  setupRadio(); // Open the RC radio communications through 
+  MODE = 8; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+  setupSerialPort();
+  setupRadio();                                               // Open the RC radio communications
+  setupIRArray();                                             // Setup the logic pins for the IR Array
+  myPID.SetOutputLimits(-PID_OUTPUT_LIMIT, PID_OUTPUT_LIMIT); // Set the limits for the PID output values
+  myPID.SetSampleTime(20);                                    // Set PID sample rate (value in ms)
+  pwm_setup();                                                // Adjust pwm to correct frequency for the drive motors
+
+  display_handler.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  // Displays Adafruit logo by default. call clearDisplay immediately if you don't want this.
+  display_handler.display();
+
+  dispMode();
 }
 
-void loop() 
-{ 
+void loop()
+{
   // Check RC input
-   rcloop();
-   // Right side toggle switch in up position is indicator for manual mode
-   if (data.tSwitch2 == 0){
-      manualMode();
-   } else {
-
+  rcloop();
+  // Right side toggle switch in up position is indicator for manual mode
+  if (data.tSwitch2 == 0)
+  {
+    manualMode();
+  }
+  else
+  {
+    // Output sensor readings to bluetooth for debuggin
     // Read the relevant sensors for tape following procedure
-  pot1 = analogRead(POT1);
-  pot2 = analogRead(POT2);
-  tapeLeft = analogRead(TAPE_L);
-  tapeRight = analogRead(TAPE_R);
+    // pot1 = analogRead(POT1);
+    // pot2 = analogRead(POT2);
+    // tapeLeft = analogRead(TAPE_L);
+    // tapeRight = analogRead(TAPE_R);
+    // outputCSV(pot1, pot2, tapeLeft, tapeRight ,MODE);
 
-// Output sensor readings to bluetooth for debugging
-    blueLoop(pot1, pot2, tapeLeft, tapeRight ,0);
-    // Follow the line
-   lineFollow(pot1); 
-   }    
+    selectRobotMode();
+  }
+}
+
+// Robot is operated through a sequence of states, current state is MODE variable
+// select the set of functions matchingb the current operation mode
+void selectRobotMode()
+{
+
+  switch (MODE)
+  {
+  case 0:
+    // Starting mode, line follow until reaching the state of 4 reflectance sensors turned off
+    // if all four are turned off, linefollow should incremend MODE to enter next state
+    if (0)
+    {
+      lineFollow();
+    }
+    else
+    {
+      //Increment mode to reach next one
+      MODE++;
+      // Update display with new mode
+      dispMode();
+    }
+    break;
+  case 1:
+    // From the chicken wire backup to the first treasure
+    moveToTreasure1();
+    break;
+  case 2:
+
+    break;
+  case 3:
+
+    break;
+  case 4:
+
+    break;
+  case 5:
+
+    break;
+  case 6:
+    captureBeacon();
+    MODE++;
+    break;
+  case 7:
+    moveToTreasure4();
+    break;
+  case 8:
+
+    IRReadingMode(); // debug mode
+    break;
+  case 9:
+    SERIAL_OUT.println("End of automation sequence");
+    break;
+  }
+}
+
+// Increment the MODE variable to enter into the next mode and update the OLED
+void dispMode()
+{
+  display_handler.clearDisplay();
+  display_handler.setTextSize(2);
+  display_handler.setTextColor(SSD1306_WHITE);
+  display_handler.setCursor(0, 0);
+  display_handler.println("MODE:");
+  display_handler.setTextSize(5);
+  display_handler.println(MODE);
+  display_handler.display();
 
 }
 
+// Manual control of robot, allows drive control and MODE select
+void manualMode()
+{
+  // Normalize drive values to -255 to 255 range
+  int leftMotor = (data.j1PotY - 128) * 1.9;
+  int rightMotor = (data.j2PotY - 128) * 1.9;
+  drive(leftMotor, rightMotor);
+  outputCSV(leftMotor, rightMotor, data.tSwitch2, 0, MODE);
 
-//TODO Move tape following back into the tape_follow.cpp file and test that it is functioning in order
-//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-
-// Global variables for tape following
-bool onTapeL = true, onTapeR = true, lastL = true, lastR  = true;
-
-
-// Now define the main code for the functions listed in the header file
-void lineFollow(int REF_THRES){
-    // Checks to see if the reflectance sensor is on tape or not
-    onTapeL = (analogRead(TAPE_L) > REF_THRES);
-    onTapeR = (analogRead(TAPE_R) > REF_THRES);
-
-    if (onTapeL || onTapeR) {
-        // Either sensor on tape
-        if (onTapeL && onTapeR) {
-            drive(FAST, FAST); 
-        } else if (!onTapeL && onTapeR)
-        {
-            drive(FAST, SLOW);
-        } else if (onTapeL && !onTapeR)
-        {
-            drive(SLOW, FAST);
-        }
-
-        lastL = onTapeL;
-        lastR = onTapeR;
-    }
-    else {
-        // Both sensors off tape, without updating last values until one sensor is on tape again
-        if (lastL) {
-            // Pushes back against left drift, allows for course correction
-            drive(-SLOW, FAST);
-        } else if (lastR)
-        {
-            // Pushes back against right drift, allows for course correction
-            drive(FAST, -SLOW);
-        } else
-        {
-            drive(-SLOW, -SLOW); // no way to ever get to this line
-        }  
-    }
+  // Use button 1 to increment MODE to start robot in desired state
+  // When automatic drive is toggled
+  if (data.button1 == 0)
+  {
+    MODE++;
+    dispMode();
+  }
+  else if (data.button2 == 0)
+  {
+    MODE--;
+    dispMode();
+  }
 }
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//TODO Move tape following back into the tape_follow.cpp file and test that it is functioning in order
 
-// Manual control of robot
-void manualMode(){
-  //Normalize drive values to -255 to 255 range
-  int leftMotor = (data.j1PotY-128)*1.9;
-  int rightMotor = (data.j2PotY-128)*1.9;
-  drive(leftMotor  , rightMotor);
-  blueLoop(leftMotor, rightMotor, data.tSwitch2,  0,  0);
+// Move from main course to treasure 1, can we hardcode this?  seems straightforward
+void moveToTreasure1()
+{
+  SERIAL_OUT.println("Moving to treasure 1");
+  // Hardcoded sequence here
+
+  // Move to next mode after (grab treasure)
+  MODE++;
+}
+
+// capture the IR beacon and move to next mode
+void captureBeacon()
+{
+
+  int heading = getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS);
+
+  if (heading == TOO_MANY_SIGNALS)
+  {
+    // React to having pins overloaded
+  }
+  else if (heading == NO_BEACON_FOUND)
+  {
+    // React to no beacon found
+    searchForBeacon(RIGHT);
+  }
+}
+
+// Move from near treasure 3 to treasure 4 by following the beacon
+void moveToTreasure4()
+{
+  if (0)
+  {
+    // Check for the end condition to indicate that treasure 4 is reached
+    myPID.SetMode(MANUAL); // Turn off PID
+    MODE++;
+  }
+  else
+  {
+    // Check that PID is active, turn on if it is off (manual)
+    if (myPID.GetMode() == MANUAL)
+    {
+      myPID.SetMode(AUTOMATIC); // Turn on PID
+    }
+
+    followBeacon(0); // Follow the beacon with a heading of 0;
+  }
+}
+
+// Follows a set heading (probably stable in the -3 to 3 range) using PID control.
+// The left potentiometer tunes P value
+// The right potentiometer tunes I value
+
+void followBeacon(int heading)
+{
+  pidSetpoint = heading;                                                                     // 0 is the heading towards the beacon
+  pidInput = getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS); // Use the heading offset from beacon as the input
+  pot1 = analogRead(POT1) / 10;
+  pot2 = analogRead(POT2) / 10;
+
+  myPID.SetTunings(pot1, pot2, 0); // Set the P and I using the two potentiometers for tuning
+  myPID.Compute();                 // This will update the pidOutput variable that is linked to myPID
+
+  outputCSV(pot1, pot2, pidInput, (int)pidSetpoint, (int)pidOutput);
+
+  drive(MEDIUM - pidOutput, MEDIUM + pidOutput); // Use the PID output as a wheel speed differential
+}
+
+// DEBUGGING and TESTING MODE for IR Array and Heading indicators
+void IRReadingMode()
+{
+
+  int IRArrayValues[IR_ARRAY_SIZE];
+  // Threshold value for IR signal being on
+  int threshold = 15;
+  // Direction from robot to beacon -7 to 7
+  int heading;
+  getIRArrayValues(IRArrayValues, TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS);
+  heading = convertToHeading(IRArrayValues, threshold);
+
+  char telemtery[60];
+  sprintf(telemtery, "%d, %d, %d, %d, %d, %d, %d, %d, %d",
+          IRArrayValues[0], IRArrayValues[1], IRArrayValues[2], IRArrayValues[3],
+          IRArrayValues[4], IRArrayValues[5], IRArrayValues[6], IRArrayValues[7], heading);
+  SERIAL_OUT.println(telemtery);
 }
 
 /*
 Radio Functions
 */
-void rcloop() {
+void rcloop()
+{
   // Check whether there is data to be received
-  if (radio.available()) {
+  if (radio.available())
+  {
     radio.read(&data, sizeof(Data_Package)); // Read the whole data and store it into the 'data' structure
-    lastReceiveTime = millis(); // At this moment we have received the data
+    lastReceiveTime = millis();              // At this moment we have received the data
   }
   // Check whether we keep receving data, or we have a connection between the two modules
   currentTime = millis();
-  if ( currentTime - lastReceiveTime > 1000 ) { // If current time is more then 1 second since we have recived the last data, that means we have lost connection
+  if (currentTime - lastReceiveTime > 1000)
+  {                   // If current time is more then 1 second since we have recived the last data, that means we have lost connection
     resetRadioData(); // If connection is lost, reset the data. It prevents unwanted behavior, for example if a drone has a throttle up and we lose connection, it can keep flying unless we reset the values
   }
 }
-void setupRadio(){
+void setupRadio()
+{
   radio.begin();
   radio.openReadingPipe(0, address);
   radio.setAutoAck(false);
@@ -184,8 +340,9 @@ void setupRadio(){
   radio.setPALevel(RF24_PA_LOW);
   radio.startListening(); //  Set the module as receiver
   resetRadioData();
-  }
-void resetRadioData() {
+}
+void resetRadioData()
+{
   // Reset the values when there is no radio connection - Set initial default values
   data.j1PotX = 127;
   data.j1PotY = 127;

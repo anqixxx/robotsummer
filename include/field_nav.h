@@ -5,6 +5,8 @@
 
 #include <Arduino.h>
 
-//Enter in function definitions for field navigation, with the code located in field_nav.cpp
+// Search for an IR beacon by spinning in a direction, input RIGHT for right and LEFT for left
+void searchForBeacon(bool dir);
+
 
 #endif
