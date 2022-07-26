@@ -3,6 +3,11 @@
 #include "hardware_def.h"
 #include <Servo.h>
 
+#define CLOSE 0
+#define OPEN 180
+#define CLAW_REF_THRES 40
+#define CLAW_MAG_THRES 1020
+
 
 // Now define the main code for the functions listed in the header file
 Servo myservo;  // create servo object to control a servo
@@ -11,7 +16,7 @@ Servo myservo;  // create servo object to control a servo
 int pos = 0;    // variable to store the servo position
 
 void servo_setup() {
-  myservo.attach(9);  // attaches the servo on pin 9 to the servo object
+  myservo.attach(CLAW_SERVO);  // attaches the servo on PWM pin 9 to the servo object
 }
 
 void servo_loop() {
@@ -27,6 +32,20 @@ void servo_loop() {
   }
 }
 
-void sero_position(int position){
+void servo_position(int position){
   myservo.write(position);
+    //Reflectance
+}
+
+void claw_loop(){
+  servo_position(OPEN);
+  if (analogRead(CLAW_REF) < CLAW_REF_THRES){
+    if(analogRead(CLAW_MAG) > CLAW_MAG_THRES){
+        servo_position(CLOSE);
+        delay(6000);
+        // Add boolean to detect magnetic, automatically stop loop if so
+    }
+  }
+  servo_position(OPEN);
+  delay(1000);
 }

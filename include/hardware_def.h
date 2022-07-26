@@ -17,17 +17,17 @@
 // Motor frequencies and pins
 #define PWM_FREQ1  100
 #define PWM_FREQ2  100
-#define L_MOTOR_FORWARD 6
-#define L_MOTOR_REV 7
-#define R_MOTOR_FORWARD 8
-#define R_MOTOR_REV 9
+#define L_MOTOR_FORWARD 6 // PMW
+#define L_MOTOR_REV 7 // PMW
+#define R_MOTOR_FORWARD 8 // PMW
+#define R_MOTOR_REV 9 // PMW
 
 // Motor and PWM Values
 #define motorInput A0
-#define Motor1F 6
-#define Motor1B 7
-#define Motor2F 8
-#define Motor2B 9
+#define Motor1F 6 // PMW
+#define Motor1B 7 // PMW
+#define Motor2F 8 // PMW
+#define Motor2B 9 // PMW
 #define PWM_FREQ1  100
 #define PWM_FREQ2  100
 
@@ -40,4 +40,8 @@
 #define TAPE_L A2
 #define TAPE_R A3
 
+// Claw Values
+#define CLAW_SERVO 4 // PMW Pin
+#define CLAW_REF A4
+#define CLAW_MAG A5
 #endif
