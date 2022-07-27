@@ -49,12 +49,10 @@ void getIRArrayValues(int SIG[], int FREQ_PERIOD, int NUM_READINGS, int SAMPLE_I
 // returns indicator value as a result if it encounters more than two pins that are above the threshold, indicating error
 int convertToHeading(int SIG[])
 {
-  int threshold = 15;
+  int threshold =  getThreshold(SIG);
   int heading = 0;
   // Track the condition of there being too many IR hits indicating error
   int pinCount = 0;
-
-  threshold = getThreshold(SIG);
 
   for (int i = 0; i < IR_ARRAY_SIZE; i++)
   {
@@ -73,7 +71,7 @@ int convertToHeading(int SIG[])
   {
     return NO_BEACON_FOUND;
   }
-  if (pinCount > 3)
+  if (pinCount > IR_ARRAY_SIZE/2)
   {
     return TOO_MANY_SIGNALS; // Too many pins active, indicate an error
   }
