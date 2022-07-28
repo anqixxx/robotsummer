@@ -12,7 +12,6 @@
 #include "motor_drive.h"
 #include "field_nav.h"
 #include "claw.h"
-#include "arm.h"
 #include "treasure.h"
 #include "serial_coms.h"
 #include "DuePWM.h"
@@ -101,6 +100,7 @@ void setup()
   setupRadio();                                                 // Open the RC radio communications
   setupIRArray();                                          // Setup the logic pins for the IR Array
   ultra_setup();                                              // Sets up sonars
+  claw_setup();                                              //
   myPID.SetOutputLimits(-PID_OUTPUT_LIMIT, PID_OUTPUT_LIMIT); // Set the limits for the PID output values
   myPID.SetSampleTime(20);                                    // Set PID sample rate (value in ms)
   pwm_setup();                                                // Adjust pwm to correct frequency for the drive motors
@@ -161,8 +161,16 @@ void selectRobotMode()
     moveToTreasure1();
     break;
   case 2:
-    UltrasonicTesting();
-    break;
+  for (int angle = 0; angle < 180; angle++)
+  {
+    arm_servo_pos(angle);
+    delay(15);
+  }
+  arm_servo_pos(0);
+  delay(100);
+
+
+      break;
   case 3:
 
     break;
