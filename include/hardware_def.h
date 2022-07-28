@@ -78,7 +78,12 @@
 
 // Claw Values
 #define CLAW_SERVO 4 // PMW Pin
-#define CLAW_REF A4
-#define CLAW_MAG A5
+#define CLAW_REF A2
+#define CLAW_MAG A3
+#define CLAW_END 53
+#define CLAW_START 51
+#define PANCAKE_FOR 49
+#define PANCAKE_BACK 47
+
 
 #endif
