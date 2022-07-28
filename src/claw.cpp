@@ -15,8 +15,15 @@ Servo myservo;  // create servo object to control a servo
 
 int pos = 0;    // variable to store the servo position
 
-void servo_setup() {
+void stopForwardPancakeMotor();
+void stopBackwardPancakeMotor();
+
+void claw_setup() {
   myservo.attach(CLAW_SERVO);  // attaches the servo on PWM pin 9 to the servo object
+  pinMode(CLAW_END, INPUT_PULLUP);
+  pinMode(CLAW_START, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(CLAW_END), stopForwardPancakeMotor, RISING);
+  attachInterrupt(digitalPinToInterrupt(CLAW_START), stopBackwardPancakeMotor, RISING);
 }
 
 void servo_loop() {
@@ -38,7 +45,9 @@ void servo_position(int position){
 }
 
 void claw_loop(){
+  //initally opens claw, assume start position is at CLAW_START
   servo_position(OPEN);
+
   if (analogRead(CLAW_REF) < CLAW_REF_THRES){
     if(analogRead(CLAW_MAG) > CLAW_MAG_THRES){
         servo_position(CLOSE);
@@ -48,4 +57,51 @@ void claw_loop(){
   }
   servo_position(OPEN);
   delay(1000);
+}
+
+void claw_forward(){
+  //If we aren't at the end already, then go forwards
+  if (digitalRead(CLAW_END)){
+    digitalWrite(PANCAKE_BACK, LOW);
+    digitalWrite(PANCAKE_FOR, HIGH);
+    Serial.print("Going Forward");
+    Serial.println();
+  }
+}
+
+void claw_backward(){
+//If we aren't currently at the start, then go backwards
+if (digitalRead(CLAW_START)){
+  digitalWrite(PANCAKE_FOR, LOW);
+  digitalWrite(PANCAKE_BACK, HIGH);
+  Serial.print("Going Backwards");
+  Serial.println();
+  }
+}
+
+void stopForwardPancakeMotor(){
+  digitalWrite(PANCAKE_FOR, LOW);
+  Serial.print("Stopped Forward");
+  Serial.println();
+
+}
+
+void stopBackwardPancakeMotor(){
+  digitalWrite(PANCAKE_BACK, LOW);
+  Serial.print("Stopped Backward");
+  Serial.println();
+}
+
+
+void claw_limitswitch(){
+  if(!digitalRead(CLAW_END)){
+    Serial.print("At End");
+    Serial.println();
+  } else if(!digitalRead(CLAW_START)){
+    Serial.print("At Start");
+    Serial.println();    
+  } else{
+    Serial.print("Middle");
+    Serial.println();   
+  }
 }

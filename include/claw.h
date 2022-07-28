@@ -7,7 +7,7 @@
 
 //Enter in function definitions for claw movement, with the code located in claw.cpp
 
-void servo_setup();
+void claw_setup();
 
 void servo_loop();
 
@@ -15,5 +15,10 @@ void servo_position(int position);
 
 void claw_loop();
 
+void claw_limitswitch();
+
+void claw_forward();
+
+void claw_backward();
 
 #endif
