@@ -11,7 +11,7 @@ void claw_setup();
 
 void servo_loop();
 
-void servo_position(int position);
+void claw_servo_pos(int position);
 
 void claw_loop();
 
@@ -24,5 +24,7 @@ void claw_backward();
 void stopBackwardPancakeMotor();
 
 void stopForwardPancakeMotor();
+
+void arm_servo_pos(int position);
 
 #endif

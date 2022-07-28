@@ -163,8 +163,16 @@ void selectRobotMode()
     moveToTreasure1();
     break;
   case 2:
-  claw_limitswitch();
-    break;
+  for (int angle = 0; angle < 180; angle++)
+  {
+    arm_servo_pos(angle);
+    delay(15);
+  }
+  arm_servo_pos(0);
+  delay(100);
+
+
+      break;
   case 3:
 
     break;
