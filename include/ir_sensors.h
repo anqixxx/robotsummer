@@ -16,7 +16,10 @@ void getIRArrayValues(int SIG[], int FREQ_PERIOD, int NUM_READINGS, int SAMPLE_I
 
 // Convert an array of IR readings and a threshold to a heading indication.  
 // Heading is from -7 to 7 indicating direction of beacon, negative is left, positive right
-int convertToHeading(int[], int);
+int convertToHeading(int[]);
+
+// Get the threshold for on off of an array
+int getThreshold(int SIG[]);
 
 // Converts an integer 'sel' to three binary values 's1,s2,s3' for MUX selection
 void setSelectors(int *s1, int *s2, int*s3, int sel);
