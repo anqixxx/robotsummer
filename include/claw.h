@@ -21,4 +21,8 @@ void claw_forward();
 
 void claw_backward();
 
+void stopBackwardPancakeMotor();
+
+void stopForwardPancakeMotor();
+
 #endif

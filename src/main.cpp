@@ -163,8 +163,7 @@ void selectRobotMode()
     moveToTreasure1();
     break;
   case 2:
-    // claw_backward();
-    claw_forward();
+  claw_limitswitch();
     break;
   case 3:
 

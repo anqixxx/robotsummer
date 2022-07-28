@@ -22,6 +22,8 @@ void claw_setup() {
   myservo.attach(CLAW_SERVO);  // attaches the servo on PWM pin 9 to the servo object
   pinMode(CLAW_END, INPUT_PULLUP);
   pinMode(CLAW_START, INPUT_PULLUP);
+  pinMode(PANCAKE_BACK, OUTPUT);
+  pinMode(PANCAKE_FOR, OUTPUT);
   attachInterrupt(digitalPinToInterrupt(CLAW_END), stopForwardPancakeMotor, RISING);
   attachInterrupt(digitalPinToInterrupt(CLAW_START), stopBackwardPancakeMotor, RISING);
 }
@@ -81,15 +83,10 @@ if (digitalRead(CLAW_START)){
 
 void stopForwardPancakeMotor(){
   digitalWrite(PANCAKE_FOR, LOW);
-  Serial.print("Stopped Forward");
-  Serial.println();
-
 }
 
 void stopBackwardPancakeMotor(){
   digitalWrite(PANCAKE_BACK, LOW);
-  Serial.print("Stopped Backward");
-  Serial.println();
 }
 
 
