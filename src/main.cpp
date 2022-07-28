@@ -48,8 +48,6 @@ struct Data_Package
 
 Data_Package data;
 
-
-
 /*
 IR PID Controller and variables
 */
@@ -98,10 +96,10 @@ int MODE = 1; // Start the robot in its initial operating state from the start l
 
 void setup()
 {
-  MODE = 2; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+  MODE = 8; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
   setupSerialPort();
-  setupRadio();                                               // Open the RC radio communications
-  setupIRArray();                                             // Setup the logic pins for the IR Array
+  setupRadio();                                                 // Open the RC radio communications
+  setupIRArray();                                          // Setup the logic pins for the IR Array
   ultra_setup();                                              // Sets up sonars
   myPID.SetOutputLimits(-PID_OUTPUT_LIMIT, PID_OUTPUT_LIMIT); // Set the limits for the PID output values
   myPID.SetSampleTime(20);                                    // Set PID sample rate (value in ms)
@@ -109,7 +107,9 @@ void setup()
 
   display_handler.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Turn on OLED
   display_handler.display();                         // Display logo
-  delay(100);                                        // Allow logo to flash before
+
+  
+  delay(2000);                                        // Allow logo to flash before
   dispMode();                                        // Display the operation mode of robot on OLED
 }
 
@@ -149,13 +149,11 @@ void selectRobotMode()
     else
     {
 
-      
-      //Debug protocol
-      outputCSV(analogRead(TAPE_L), analogRead(TAPE_R), data.pot1 ,data.pot2 ,0);
+      // Debug protocol
+      outputCSV(analogRead(TAPE_L), analogRead(TAPE_R), data.pot1, data.pot2, 0);
 
       // Follow line
       lineFollow();
-
     }
     break;
   case 1:
@@ -182,11 +180,15 @@ void selectRobotMode()
     moveToTreasure4();
     break;
   case 8:
-    //outputCSV(getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS),getHeadingToBeacon(ONE_KHZ, ONE_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS),0,0,0);
+    // outputCSV(getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS),getHeadingToBeacon(ONE_KHZ, ONE_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS),0,0,0);
     IRReadingMode(); // debug mode
     break;
   case 9:
     SERIAL_OUT.println("End of automation sequence");
+    break;
+
+  case -1:
+    SERIAL_OUT.println("Error");
     break;
   }
 }
@@ -309,7 +311,7 @@ void IRReadingMode()
   // Direction from robot to beacon -7 to 7
   int heading;
   getIRArrayValues(IRArrayValues, TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS);
-  heading = convertToHeading(IRArrayValues);
+   //heading = convertToHeading(IRArrayValues);
 
   char telemtery[60];
   sprintf(telemtery, "%d, %d, %d, %d, %d, %d, %d, %d, %d",
@@ -318,10 +320,10 @@ void IRReadingMode()
   SERIAL_OUT.println(telemtery);
 }
 
-void UltrasonicTesting(){
- ultra_loop();
+void UltrasonicTesting()
+{
+  ultra_loop();
 }
-
 
 /*
 Radio Functions

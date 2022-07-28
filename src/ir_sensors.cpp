@@ -108,7 +108,7 @@ int getThreshold(int SIG[])
   return threshold*3;
 }
 
-// Set the selector pins to match a given channel integer (0-7) --
+// Set the selector pins to match a giv= channel integer (0-7) --
 // Input: - pointers to the three select pin states s1,s2,s3 where s3 is most significant bit
 //        - sel, the channel to be selected, an integer from 0 to 7
 void setSelectors(int *s1, int *s2, int *s3, int sel)
