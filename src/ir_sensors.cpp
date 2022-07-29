@@ -13,7 +13,7 @@ void setupIRArray()
   pinMode(IR_S3, OUTPUT);
 }
 
-int getHeadingToBeacon(int FREQ_PERIOD, int NUM_READINGS, int SAMPLE_INTERVAL, int NUM_OFFSETS)
+double getHeadingToBeacon(int FREQ_PERIOD, int NUM_READINGS, int SAMPLE_INTERVAL, int NUM_OFFSETS)
 {
   int SIG[IR_ARRAY_SIZE];
   getIRArrayValues(SIG, FREQ_PERIOD, NUM_READINGS, SAMPLE_INTERVAL, NUM_OFFSETS);
@@ -47,23 +47,22 @@ void getIRArrayValues(int SIG[], int FREQ_PERIOD, int NUM_READINGS, int SAMPLE_I
 
 // Converts the filtered array values to a heading, heading is from -7 to 7 with 0 being straight ahead
 // returns indicator value as a result if it encounters more than two pins that are above the threshold, indicating error
-int convertToHeading(int SIG[])
+double convertToHeading(int SIG[])
 {
   int threshold =  getThreshold(SIG);
-  int heading = 0;
+  double heading = 0;
   // Track the condition of there being too many IR hits indicating error
   int pinCount = 0;
+  int netPing = 0;
+
 
   for (int i = 0; i < IR_ARRAY_SIZE; i++)
-  {
-    /* code */
-  }
-
   for (int i = 0; i < IR_ARRAY_SIZE; i++)
   {
     if (SIG[i] > threshold)
     {
-      heading += i;
+      heading += i*SIG[i];
+      netPing+= SIG[i];
       pinCount++;
     }
   }
@@ -71,12 +70,11 @@ int convertToHeading(int SIG[])
   {
     return NO_BEACON_FOUND;
   }
-  if (pinCount > IR_ARRAY_SIZE/2)
-  {
-    return TOO_MANY_SIGNALS; // Too many pins active, indicate an error
-  }
+
+
+  heading = heading/netPing;
   // The result is the single pin, or the average pin heading (divide by number of pins included)
-  return (((2 * heading) / pinCount) - 7);
+  return ((2 * heading) - 7);
 }
 
 // Define a lower threshold at which the IR is considered on or off the beacon
@@ -84,6 +82,12 @@ int convertToHeading(int SIG[])
 int getThreshold(int SIG[])
 {
   int threshold = 0;
+int COPY[IR_ARRAY_SIZE];
+
+for (int i = 0; i < IR_ARRAY_SIZE; i++)
+{
+  COPY[i] = SIG[i];
+}
 
   // Sort the array low to high
   int i, j, min, temp;
@@ -91,21 +95,27 @@ int getThreshold(int SIG[])
   {
     min = i;
     for (j = i + 1; j < IR_ARRAY_SIZE; j++)
-      if (SIG[j] < SIG[min])
+      if (COPY[j] < COPY[min])
         min = j;
-    temp = SIG[i];
-    SIG[i] = SIG[min];
-    SIG[min] = temp;
+    temp = COPY[i];
+    COPY[i] = COPY[min];
+    COPY[min] = temp;
   }
+
+  //       char telemtery[60];
+  // sprintf(telemtery, "%d, %d, %d, %d, %d, %d, %d, %d",
+  //         COPY[0], COPY[1], COPY[2], COPY[3],
+  //         COPY[4], COPY[5], COPY[6], COPY[7]);
+  // SERIAL_OUT.println(telemtery);
 
   // Find average of four minimum values
   for (i = 0; i < IR_ARRAY_SIZE/2; i++){
-    threshold += SIG[i];
+    threshold += COPY[i];
   }
-  threshold = threshold/(IR_ARRAY_SIZE/2);
-
+  threshold = threshold/(IR_ARRAY_SIZE/2); // Average
+threshold = ((threshold + 2)*3)/2;
   // The threshold is three times the average minimum value of the array
-  return threshold*3;
+  return threshold ;
 }
 
 // Set the selector pins to match a giv= channel integer (0-7) --

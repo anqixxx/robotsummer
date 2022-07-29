@@ -28,9 +28,9 @@
 
 // Drive Speeds
 #define FULL 255
-#define FAST  160 // Variables for speed, test to find the one best for us
+#define FAST  200 // Variables for speed, test to find the one best for us
 #define MEDIUM 100
-#define SLOW 70
+#define SLOW 80
 
 // Turning directions
 #define RIGHT 1
@@ -40,24 +40,24 @@
 #define POT2 A1
 
 // Tape Following Values
-#define TAPE_L A11
+#define TAPE_FAR_L A8
+#define TAPE_L A9
 #define TAPE_R A10
-#define TAPE_FAR_L A4
-#define TAPE_FAR_R A5
+#define TAPE_FAR_R A11
 
 // IR Beacon Readings
 #define TEN_KHZ 100  // period of 10khz in us
 #define ONE_KHZ 1000  // period of 1khz in us
-#define TEN_KHZ_READINGS 300
+#define TEN_KHZ_READINGS 500
 #define ONE_KHZ_READINGS 1000
-#define SAMPLE_PERIOD 7       // 7 us sample period by default
-#define STANDARD_OFFSETS 6    // number of parallel dot products
+#define SAMPLE_PERIOD 8       // 7 us sample period by default
+#define STANDARD_OFFSETS 4    // number of parallel dot products
 
 #define IR_BEACON A6
-#define IR_EN 24
-#define IR_S3 26
-#define IR_S2 28
-#define IR_S1 30
+#define IR_EN 27
+#define IR_S3 29
+#define IR_S2 31
+#define IR_S1 33
 #define IR_ARRAY_SIZE 8
 #define BEACON_THRESHHOLD 15 // Threshold value between noise and signal for beacon following
 

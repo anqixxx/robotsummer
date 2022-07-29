@@ -91,16 +91,16 @@ void UltrasonicTesting();
 /*
 Robot mode - Select which stage of operation the robot is in
 */
-int MODE = 1; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+int MODE = 0; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
 
 void setup()
 {
-  MODE = 3; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+  MODE = 0; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
   setupSerialPort();
-  setupRadio();                                                 // Open the RC radio communications
-  setupIRArray();                                          // Setup the logic pins for the IR Array
+  setupRadio();                                               // Open the RC radio communications
+  setupIRArray();                                             // Setup the logic pins for the IR Array
   ultra_setup();                                              // Sets up sonars
-  claw_setup();                                              //
+  claw_setup();                                               //
   myPID.SetOutputLimits(-PID_OUTPUT_LIMIT, PID_OUTPUT_LIMIT); // Set the limits for the PID output values
   myPID.SetSampleTime(20);                                    // Set PID sample rate (value in ms)
   pwm_setup();                                                // Adjust pwm to correct frequency for the drive motors
@@ -108,9 +108,8 @@ void setup()
   display_handler.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Turn on OLED
   display_handler.display();                         // Display logo
 
-  
-  delay(2000);                                        // Allow logo to flash before
-  dispMode();                                        // Display the operation mode of robot on OLED
+  delay(2000); // Allow logo to flash before
+  dispMode();  // Display the operation mode of robot on OLED
 }
 
 void loop()
@@ -139,43 +138,55 @@ void selectRobotMode()
   case 0:
     // Starting mode, line follow until reaching the state of 4 reflectance sensors turned off
     // if all four are turned off or some other trigger
-    if (0)
-    {
-      // Increment mode to reach next one
-      MODE++;
-      // Update display with new mode
-      dispMode();
-    }
-    else
-    {
+    // if (analogRead(TAPE_FAR_L) > 300 && analogRead(TAPE_FAR_R) > 300)
+    // {
+
+    //   // Increment mode to reach next one
+    //   MODE++;
+    //   // Update display with new mode
+    //   dispMode();
+    // }
+    // else
+    //{
 
       // Debug protocol
       outputCSV(analogRead(TAPE_L), analogRead(TAPE_R), data.pot1, data.pot2, 0);
 
       // Follow line
       lineFollow();
-    }
+    //}
     break;
   case 1:
     // From the chicken wire backup to the first treasure
     moveToTreasure1();
     break;
   case 2:
-  for (int angle = 40; angle < 140; angle++)
-  {
-    arm_servo_pos(angle);
-    delay(100);
-  }
-  arm_servo_pos(0);
-  delay(300);
+    for (int angle = 40; angle < 140; angle++)
+    {
+      arm_servo_pos(angle);
+      delay(100);
+    }
+    arm_servo_pos(0);
+    delay(300);
 
-
-      break;
+    break;
   case 3:
-  claw_loop();
-  break;
+    claw_loop();
+    break;
   case 4:
+        if (analogRead(TAPE_L) > 300 && analogRead(TAPE_R) > 300 && getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS) != NO_BEACON_FOUND)
+    {
 
+      // Increment mode to reach next one
+      MODE= MODE+2;
+      // Update display with new mode
+      dispMode();
+    }
+    else
+    {
+      // Follow line
+      lineFollow();
+    }
     break;
   case 5:
 
@@ -241,13 +252,36 @@ void manualMode()
     setupRadio();
     dispMode();
   }
+
+  if (data.button3 == 0)
+  {
+        while (digitalRead(CLAW_START))
+    {
+      claw_backward();
+    }
+    resetRadioData();
+    delay(100);
+    setupRadio();
+  }
+  else if (data.button4 == 0)
+  {
+    while (digitalRead(CLAW_END))
+    {
+      claw_forward();
+    }
+    resetRadioData();
+    delay(100);
+    setupRadio();
+  }
 }
 
 // Move from main course to treasure 1, can we hardcode this?  seems straightforward
 void moveToTreasure1()
 {
   SERIAL_OUT.println("Moving to treasure 1");
-  // Hardcoded sequence here
+  drive(-120, -120);
+  delay(900);
+  drive(0, 0);
 
   // Move to next mode after (grab treasure)
   MODE++;
@@ -301,6 +335,8 @@ void followBeacon(int heading)
   pidInput = getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS); // Use the heading offset from beacon as the input
   pot1 = data.pot1 / 2;
   pot2 = data.pot2 / 2;
+  SERIAL_OUT.println(pot1);
+  SERIAL_OUT.print(pot2);
 
   myPID.SetTunings(pot1, pot2, 0); // Set the P and I using the two potentiometers for tuning
   myPID.Compute();                 // This will update the pidOutput variable that is linked to myPID
@@ -317,9 +353,9 @@ void IRReadingMode()
   int IRArrayValues[IR_ARRAY_SIZE];
 
   // Direction from robot to beacon -7 to 7
-  int heading;
+  int heading = 0;
   getIRArrayValues(IRArrayValues, TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS);
-   //heading = convertToHeading(IRArrayValues);
+  heading = convertToHeading(IRArrayValues);
 
   char telemtery[60];
   sprintf(telemtery, "%d, %d, %d, %d, %d, %d, %d, %d, %d",
