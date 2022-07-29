@@ -29,6 +29,10 @@ void claw_setup() {
   attachInterrupt(digitalPinToInterrupt(CLAW_END), stopForwardPancakeMotor, RISING);
   attachInterrupt(digitalPinToInterrupt(CLAW_START), stopBackwardPancakeMotor, RISING);
   claw_servo_pos(OPEN);
+  
+  while(digitalRead(CLAW_START)){
+    claw_backward();
+  }  
 
 }
 
