@@ -23,8 +23,13 @@
     Public Domain
 */
 
+#define TREAS_THRES 7
 // Anything over 400 cm (23200 us pulse) is "out of range"
 const unsigned int MAX_DIST = 23200;
+
+// Function Defs
+int sonar_cm(int TRIGGER, int ECHO);
+int sonar_in(int TRIGGER, int ECHO);
 
 void ultra_setup() {
 
@@ -134,9 +139,6 @@ int sonar_cm(int TRIGGER, int ECHO) {
   } else {
     return cm;
   }
-
-  // Wait at least 60ms before next measurement
-  delay(60);
 }
 
 int sonar_in(int TRIGGER, int ECHO) {
@@ -171,7 +173,15 @@ int sonar_in(int TRIGGER, int ECHO) {
   } else {
     return inches;
   }
+}
 
-  // Wait at least 60ms before next measurement
-  delay(60);
+// NOTE: If using often in a row, must wait at least 60ms before next measurement
+// i.e: delay(60);
+bool treasure_detect(int TRIGGER, int ECHO){
+  if (sonar_cm(TRIGGER, ECHO) <= TREAS_THRES){
+    Serial.println("Treasure in Range");
+    return true;
+  } else{
+    return false;
+  }
 }

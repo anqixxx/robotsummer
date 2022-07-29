@@ -76,7 +76,7 @@
 #define CLAW_START 51 //Digital
 #define PANCAKE_FOR 49 //Digital
 #define PANCAKE_BACK 47 //Digital
-#define ARM_SERVO 5 // PMW Pin
+#define ARM_SERVO 3 // PMW Pin
 
 // Sonars
 #define RIGHT_TRIG_PIN 38 // Digital
