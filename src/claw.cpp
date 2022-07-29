@@ -28,6 +28,8 @@ void claw_setup() {
   pinMode(PANCAKE_FOR, OUTPUT);
   attachInterrupt(digitalPinToInterrupt(CLAW_END), stopForwardPancakeMotor, RISING);
   attachInterrupt(digitalPinToInterrupt(CLAW_START), stopBackwardPancakeMotor, RISING);
+  claw_servo_pos(OPEN);
+
 }
 
 /**
@@ -82,22 +84,28 @@ void claw_servo_pos(int position){
 void claw_loop(){
   //initally opens claw, assume start position is at CLAW_START
   claw_servo_pos(OPEN);
-  claw_forward();
+  while(digitalRead(CLAW_END)){
+    claw_forward();
+  }
 
-  // Sets initial angle as 0, to allow for full sweep
+  // Sets initial angle as 40, to allow for sweep
   // Will exit loop if the threshold is not broached
-  for (int angle = 0; angle < 180 && (analogRead(CLAW_REF) > CLAW_REF_THRES); angle++)
+  for (int angle = 40; angle < 140 && (analogRead(CLAW_REF) > CLAW_REF_THRES); angle++)
   {
     arm_servo_pos(angle);
+    delay(100);
   }
+  delay(15);
 
   if (analogRead(CLAW_REF) < CLAW_REF_THRES){
     if(analogRead(CLAW_MAG) > CLAW_MAG_THRES){
         claw_servo_pos(CLOSE);
     }
   }
-  
-  claw_backward();
+
+  while(digitalRead(CLAW_START)){
+    claw_backward();
+  }
   claw_servo_pos(OPEN);
   delay(1000);
 }

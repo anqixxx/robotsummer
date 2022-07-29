@@ -95,7 +95,7 @@ int MODE = 1; // Start the robot in its initial operating state from the start l
 
 void setup()
 {
-  MODE = 8; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+  MODE = 3; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
   setupSerialPort();
   setupRadio();                                                 // Open the RC radio communications
   setupIRArray();                                          // Setup the logic pins for the IR Array
@@ -161,19 +161,19 @@ void selectRobotMode()
     moveToTreasure1();
     break;
   case 2:
-  for (int angle = 0; angle < 180; angle++)
+  for (int angle = 40; angle < 140; angle++)
   {
     arm_servo_pos(angle);
-    delay(15);
+    delay(100);
   }
   arm_servo_pos(0);
-  delay(100);
+  delay(300);
 
 
       break;
   case 3:
-
-    break;
+  claw_loop();
+  break;
   case 4:
 
     break;

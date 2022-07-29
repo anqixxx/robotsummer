@@ -72,10 +72,10 @@
 #define CLAW_SERVO 4 // PMW Pin
 #define CLAW_REF A2
 #define CLAW_MAG A3
-#define CLAW_END 53 //Digital
-#define CLAW_START 51 //Digital
-#define PANCAKE_FOR 49 //Digital
-#define PANCAKE_BACK 47 //Digital
+#define CLAW_END 41 //Digital
+#define CLAW_START 39 // Digital
+#define PANCAKE_FOR 11 // PWM
+#define PANCAKE_BACK 12 // PWM 
 #define ARM_SERVO 3 // PMW Pin
 
 // Sonars
