@@ -139,8 +139,9 @@ void selectRobotMode()
   case 0:
     // Starting mode, line follow until reaching the state of 4 reflectance sensors turned off
     // if all four are turned off or some other trigger
-    if (0)
+    if (analogRead(TAPE_FAR_L)> 300 && analogRead(TAPE_FAR_R) > 300)
     {
+
       // Increment mode to reach next one
       MODE++;
       // Update display with new mode
@@ -247,7 +248,9 @@ void manualMode()
 void moveToTreasure1()
 {
   SERIAL_OUT.println("Moving to treasure 1");
-  // Hardcoded sequence here
+  drive(-120,-120);
+  delay(900);
+  drive(0,0);
 
   // Move to next mode after (grab treasure)
   MODE++;
@@ -301,6 +304,9 @@ void followBeacon(int heading)
   pidInput = getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS); // Use the heading offset from beacon as the input
   pot1 = data.pot1 / 2;
   pot2 = data.pot2 / 2;
+  SERIAL_OUT.println(pot1);
+  SERIAL_OUT.print(pot2);
+
 
   myPID.SetTunings(pot1, pot2, 0); // Set the P and I using the two potentiometers for tuning
   myPID.Compute();                 // This will update the pidOutput variable that is linked to myPID
@@ -317,9 +323,9 @@ void IRReadingMode()
   int IRArrayValues[IR_ARRAY_SIZE];
 
   // Direction from robot to beacon -7 to 7
-  int heading;
+  int heading = 0;
   getIRArrayValues(IRArrayValues, TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS);
-   //heading = convertToHeading(IRArrayValues);
+  heading = convertToHeading(IRArrayValues);
 
   char telemtery[60];
   sprintf(telemtery, "%d, %d, %d, %d, %d, %d, %d, %d, %d",
