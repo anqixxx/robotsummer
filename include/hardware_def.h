@@ -40,10 +40,10 @@
 #define POT2 A1
 
 // Tape Following Values
-#define TAPE_FAR_L A8
-#define TAPE_L A9
+#define TAPE_L A11
 #define TAPE_R A10
-#define TAPE_FAR_R A11
+#define TAPE_FAR_L A4
+#define TAPE_FAR_R A5
 
 // IR Beacon Readings
 #define TEN_KHZ 100  // period of 10khz in us
@@ -54,10 +54,10 @@
 #define STANDARD_OFFSETS 4    // number of parallel dot products
 
 #define IR_BEACON A6
-#define IR_EN 27
-#define IR_S3 29
-#define IR_S2 31
-#define IR_S1 33
+#define IR_EN 24
+#define IR_S3 26
+#define IR_S2 28
+#define IR_S1 30
 #define IR_ARRAY_SIZE 8
 #define BEACON_THRESHHOLD 15 // Threshold value between noise and signal for beacon following
 
@@ -77,5 +77,11 @@
 #define PANCAKE_FOR 49 //Digital
 #define PANCAKE_BACK 47 //Digital
 #define ARM_SERVO 5 // PMW Pin
+
+// Sonars
+#define RIGHT_TRIG_PIN 38 // Digital
+#define RIGHT_ECHO_PIN 40 // Digital
+#define LEFT_TRIG_PIN 34 // Digital
+#define LEFT_ECHO_PIN 36 // Digital
 
 #endif
