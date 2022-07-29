@@ -90,24 +90,35 @@ void claw_loop(){
 
   // Sets initial angle as 40, to allow for sweep
   // Will exit loop if the threshold is not broached
+  int final_angle = 40;
   for (int angle = 40; angle < 140 && (analogRead(CLAW_REF) > CLAW_REF_THRES); angle++)
   {
     arm_servo_pos(angle);
     delay(100);
+    final_angle = angle;
   }
   delay(15);
 
   if (analogRead(CLAW_REF) < CLAW_REF_THRES){
     if(analogRead(CLAW_MAG) > CLAW_MAG_THRES){
         claw_servo_pos(CLOSE);
+
+        if (final_angle < 90){
+          arm_servo_pos(40);
+        } else {
+          arm_servo_pos(140);
+        }
+        delay(1000);
+        arm_servo_pos(final_angle);
+        delay(200);
     }
   }
 
-  while(digitalRead(CLAW_START)){
-    claw_backward();
-  }
-  claw_servo_pos(OPEN);
-  delay(1000);
+  // while(digitalRead(CLAW_START)){
+  //   claw_backward();
+  // }
+  // claw_servo_pos(OPEN);
+  // delay(1000);
 }
 
 void test_claw_loop(){

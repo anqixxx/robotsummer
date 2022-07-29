@@ -162,18 +162,9 @@ void selectRobotMode()
     moveToTreasure1();
     break;
   case 2:
-  for (int angle = 40; angle < 140; angle++)
-  {
-    arm_servo_pos(angle);
-    delay(100);
-  }
-  arm_servo_pos(0);
-  delay(300);
-
-
-      break;
+    claw_loop();
+  break;
   case 3:
-  claw_loop();
   break;
   case 4:
 
