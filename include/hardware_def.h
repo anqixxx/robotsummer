@@ -5,7 +5,7 @@
 
 // Serial 3 is the TX RX port #3 (connect to BT)
 // Serial is the USB programming port
-#define SERIAL_OUT Serial3
+#define SERIAL_OUT Serial
 #define SERIAL_RATE 9600
 
 // OLED Display
@@ -25,7 +25,6 @@
 #define R_MOTOR_FORWARD 8 // PMW
 #define R_MOTOR_REV 9 // PMW
 
-
 // Drive Speeds
 #define FULL 255
 #define FAST  200 // Variables for speed, test to find the one best for us
@@ -36,8 +35,12 @@
 #define RIGHT 1
 #define LEFT 0
 
-#define POT1 A0
-#define POT2 A1
+// Stepper Motor Pins
+#define STEPPER_STEP 26
+#define STEPPER_DIR 28
+#define STEPPER_SLEEP 30
+#define STEPPER_LIMIT 32 // Limit switch
+
 
 // Tape Following Values
 #define TAPE_FAR_L A8
@@ -65,7 +68,8 @@
 #define TOO_MANY_SIGNALS 8 // Flag for too many IR sensors being pinged by beacon
 
 #define PID_OUTPUT_LIMIT 100 // Sets the limits for positive or negative on the PID output
-
+#define PID_P_TUNING 21
+#define PID_I_TUNING 9
 
 
 // Claw Values

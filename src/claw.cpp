@@ -28,8 +28,8 @@ void claw_setup() {
   pinMode(CLAW_START, INPUT_PULLUP);
   pinMode(PANCAKE_BACK, OUTPUT);
   pinMode(PANCAKE_FOR, OUTPUT);
-  attachInterrupt(digitalPinToInterrupt(CLAW_END), stopForwardPancakeMotor, RISING);
-  attachInterrupt(digitalPinToInterrupt(CLAW_START), stopBackwardPancakeMotor, RISING);
+  attachInterrupt(digitalPinToInterrupt(CLAW_END), stopForwardPancakeMotor, FALLING);
+  attachInterrupt(digitalPinToInterrupt(CLAW_START), stopBackwardPancakeMotor, FALLING);
   claw_servo_pos(OPEN);
   
   timer = millis();

@@ -5,6 +5,7 @@
 #include <SPI.h>
 #include <RF24.h>
 #include <Adafruit_SSD1306.h>
+#include <AccelStepper.h>
 
 #include "hardware_def.h"
 #include "tape_follow.h"
@@ -48,6 +49,12 @@ struct Data_Package
 Data_Package data;
 
 /*
+* Stepper motor definition
+*/
+AccelStepper stepper(AccelStepper::DRIVER, STEPPER_STEP, STEPPER_DIR);
+int stepperPosition = 0;
+
+/*
 IR PID Controller and variables
 */
 // Global variables for the setpoint, input and output
@@ -58,16 +65,14 @@ PID myPID(&pidInput, &pidOutput, &pidSetpoint, 2, 0, 0, DIRECT);
 // OLED handler
 Adafruit_SSD1306 display_handler(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-/*
-Tape Follow Calibration
-*/
-int pot1;
-int pot2;
-
 // RC Functions
 void rcloop();
 void setupRadio();
 void resetRadioData();
+
+// Stepper motor
+void setupStepper();
+void stopStepper();
 
 // Robot Mode Selection
 void selectRobotMode();
@@ -363,7 +368,7 @@ void IRReadingMode()
   }
 
   char telemtery[60];
-  sprintf(telemtery, "%d, %d, %d, %d, %d, %d, %d, %d, %d",
+  sprintf(telemtery, "%d, %d, %d, %d, %d, %d, %d, %d",
           IRArrayValues[0], IRArrayValues[1], IRArrayValues[2], IRArrayValues[3],
           IRArrayValues[4], IRArrayValues[5], IRArrayValues[6], IRArrayValues[7]);
   SERIAL_OUT.println(telemtery);
@@ -372,6 +377,23 @@ void IRReadingMode()
 void UltrasonicTesting()
 {
   ultra_loop();
+}
+
+
+/*
+* Stepper Functions
+*/
+void setupStepper(){
+  stepper.setMaxSpeed(1000);
+  stepper.setAcceleration(1500);
+  pinMode(STEPPER_SLEEP, OUTPUT);
+  pinMode(STEPPER_LIMIT, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(STEPPER_LIMIT), stopStepper, FALLING);
+}
+
+// ISR to prevent stepper failure
+void stopStepper(){
+  SERIAL_OUT.println("INTERRUPT!");
 }
 
 /*
