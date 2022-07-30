@@ -138,19 +138,7 @@ void selectRobotMode()
   case 0:
     // Starting mode, line follow until reaching the state of 4 reflectance sensors turned off
     // if all four are turned off or some other trigger
-<<<<<<< HEAD
-    // if (analogRead(TAPE_FAR_L) > 300 && analogRead(TAPE_FAR_R) > 300)
-    // {
-
-    //   // Increment mode to reach next one
-    //   MODE++;
-    //   // Update display with new mode
-    //   dispMode();
-    // }
-    // else
-    //{
-=======
-    if (analogRead(TAPE_FAR_L)> 300 && analogRead(TAPE_FAR_R) > 300)
+    if (analogRead(TAPE_FAR_L) > 300 && analogRead(TAPE_FAR_R) > 300)
     {
 
       // Increment mode to reach next one
@@ -160,21 +148,19 @@ void selectRobotMode()
     }
     else
     {
->>>>>>> 81a34a0c63a451150178d4889cfad006b716fc5b
 
       // Debug protocol
       outputCSV(analogRead(TAPE_L), analogRead(TAPE_R), data.pot1, data.pot2, 0);
 
       // Follow line
       lineFollow();
-    //}
+    }
     break;
   case 1:
     // From the chicken wire backup to the first treasure
     moveToTreasure1();
     break;
   case 2:
-<<<<<<< HEAD
     for (int angle = 40; angle < 140; angle++)
     {
       arm_servo_pos(angle);
@@ -182,23 +168,21 @@ void selectRobotMode()
     }
     arm_servo_pos(0);
     delay(300);
+    MODE++;
+    dispMode();
 
     break;
   case 3:
-    claw_loop();
+    // claw_loop();
     break;
-=======
-    claw_loop();
-  break;
-  case 3:
-  break;
->>>>>>> 81a34a0c63a451150178d4889cfad006b716fc5b
   case 4:
-        if (analogRead(TAPE_L) > 300 && analogRead(TAPE_R) > 300 && getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS) != NO_BEACON_FOUND)
+    if (analogRead(TAPE_L) > 300 && analogRead(TAPE_R) > 300 &&
+        analogRead(TAPE_FAR_L) > 300 && analogRead(TAPE_FAR_R) > 300 &&
+        getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS) != NO_BEACON_FOUND)
     {
 
       // Increment mode to reach next one
-      MODE= MODE+2;
+      MODE = MODE + 2;
       // Update display with new mode
       dispMode();
     }
@@ -275,7 +259,7 @@ void manualMode()
 
   if (data.button3 == 0)
   {
-        while (digitalRead(CLAW_START))
+    while (digitalRead(CLAW_START))
     {
       claw_backward();
     }
@@ -299,18 +283,12 @@ void manualMode()
 void moveToTreasure1()
 {
   SERIAL_OUT.println("Moving to treasure 1");
-<<<<<<< HEAD
   drive(-120, -120);
-  delay(900);
+  delay(1100);
   drive(0, 0);
-=======
-  drive(-120,-120);
-  delay(900);
-  drive(0,0);
->>>>>>> 81a34a0c63a451150178d4889cfad006b716fc5b
-
-  // Move to next mode after (grab treasure)
   MODE++;
+  dispMode();
+  // Move to next mode after (grab treasure)
 }
 
 // capture the IR beacon and move to next mode
@@ -363,10 +341,6 @@ void followBeacon(int heading)
   pot2 = data.pot2 / 2;
   SERIAL_OUT.println(pot1);
   SERIAL_OUT.print(pot2);
-<<<<<<< HEAD
-=======
-
->>>>>>> 81a34a0c63a451150178d4889cfad006b716fc5b
 
   myPID.SetTunings(pot1, pot2, 0); // Set the P and I using the two potentiometers for tuning
   myPID.Compute();                 // This will update the pidOutput variable that is linked to myPID

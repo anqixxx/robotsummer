@@ -20,6 +20,8 @@ void stopForwardPancakeMotor();
 void stopBackwardPancakeMotor();
 
 void claw_setup() {
+  int timer = 0;
+
   clawservo.attach(CLAW_SERVO);  // attaches the claw servo on PWM pin to the servo object
   armservo.attach(ARM_SERVO);  // attaches the arm servo on PWM pin to the servo object
   pinMode(CLAW_END, INPUT_PULLUP);
@@ -30,7 +32,8 @@ void claw_setup() {
   attachInterrupt(digitalPinToInterrupt(CLAW_START), stopBackwardPancakeMotor, RISING);
   claw_servo_pos(OPEN);
   
-  while(digitalRead(CLAW_START)){
+  timer = millis();
+  while(digitalRead(CLAW_START) && millis()-timer < 1500){
     claw_backward();
   }  
 
@@ -86,9 +89,12 @@ void claw_servo_pos(int position){
     Loop for picking up treasures
 **/
 void claw_loop(){
+  int timer;
   //initally opens claw, assume start position is at CLAW_START
   claw_servo_pos(OPEN);
-  while(digitalRead(CLAW_END)){
+
+  timer = millis();
+  while(digitalRead(CLAW_END) && millis()-timer < 1500){
     claw_forward();
   }
 
@@ -118,11 +124,12 @@ void claw_loop(){
     }
   }
 
-  // while(digitalRead(CLAW_START)){
-  //   claw_backward();
-  // }
-  // claw_servo_pos(OPEN);
-  // delay(1000);
+  timer = millis();
+  while(digitalRead(CLAW_START)  && millis()-timer < 1500){
+    claw_backward();
+  }
+  claw_servo_pos(OPEN);
+  delay(1000);
 }
 
 void test_claw_loop(){
