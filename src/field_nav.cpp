@@ -24,17 +24,7 @@ void searchForBeacon(bool dir){
     heading = getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS);
     tNow = millis();
     }
-    while (heading == NO_BEACON_FOUND && (tNow-tStart) <  1000); // Stop trying after one second
-
-    if (heading == NO_BEACON_FOUND){
-        // Drive forward for 100 ms and then search again
-        tStart = millis();
-        while (tNow - tStart < 100){
-        drive(FAST,FAST);
-        tNow = millis();
-        }
-        searchForBeacon(dir);
-    }
+    while (heading == NO_BEACON_FOUND && (tNow-tStart) <  2000); // Stop trying after one second
 
     // Now that beacon is found, home in a bit more on it at slower rotation
     tStart = millis(); // Start time of search
@@ -44,7 +34,6 @@ void searchForBeacon(bool dir){
         } else {
             drive(-SLOW, SLOW); // Turn left
     }
-    heading = getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS);
     tNow = millis();
     }
     while ((tNow-tStart) <  40); // Only rotate another 40 ms to not overshoot

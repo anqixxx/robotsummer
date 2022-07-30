@@ -161,6 +161,7 @@ void selectRobotMode()
     moveToTreasure1();
     break;
   case 2:
+  // Make a sweep for the treasure
     for (int angle = 40; angle < 140; angle++)
     {
       arm_servo_pos(angle);
@@ -176,9 +177,11 @@ void selectRobotMode()
     // claw_loop();
     break;
   case 4:
+  // Test case for transition off tape to beacon
+  // IDEA: unlike chicken wire, use the alignment of an unfiltered beacon signal to trigger transition through the
     if (analogRead(TAPE_L) > 300 && analogRead(TAPE_R) > 300 &&
         analogRead(TAPE_FAR_L) > 300 && analogRead(TAPE_FAR_R) > 300 &&
-        getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS) != NO_BEACON_FOUND)
+        getUnfilteredIRArrayValue(4) > 10) // <--- Test this out to see which one indicates transition off of tape and into IR
     {
 
       // Increment mode to reach next one
@@ -330,41 +333,39 @@ void moveToTreasure4()
 }
 
 // Follows a set heading (probably stable in the -3 to 3 range) using PID control.
-// The left potentiometer tunes P value
-// The right potentiometer tunes I value
 
 void followBeacon(int heading)
 {
+  int averageSpeed = 100;
   pidSetpoint = heading;                                                                     // 0 is the heading towards the beacon
   pidInput = getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS); // Use the heading offset from beacon as the input
-  pot1 = data.pot1 / 2;
-  pot2 = data.pot2 / 2;
-  SERIAL_OUT.println(pot1);
-  SERIAL_OUT.print(pot2);
 
-  myPID.SetTunings(pot1, pot2, 0); // Set the P and I using the two potentiometers for tuning
+
+  myPID.SetTunings(PID_P_TUNING, PID_I_TUNING, 0); // Set the P and I using the two potentiometers for tuning
   myPID.Compute();                 // This will update the pidOutput variable that is linked to myPID
 
-  outputCSV(pot1, pot2, pidInput, (int)pidSetpoint, (int)pidOutput); // Debugging information
-
-  drive(MEDIUM - pidOutput, MEDIUM + pidOutput); // Use the PID output as a wheel speed differential
+  // outputCSV(pot1, pot2, pidInput, (int)pidSetpoint, (int)pidOutput); // Debugging information
+  drive(averageSpeed- pidOutput, averageSpeed + pidOutput); // Use the PID output as a wheel speed differential
 }
 
 // DEBUGGING and TESTING MODE for IR Array and Heading indicators
 void IRReadingMode()
 {
-
   int IRArrayValues[IR_ARRAY_SIZE];
 
   // Direction from robot to beacon -7 to 7
-  int heading = 0;
-  getIRArrayValues(IRArrayValues, TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS);
-  heading = convertToHeading(IRArrayValues);
+  // int heading = 0;
+  // getIRArrayValues(IRArrayValues, TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS);
+  // heading = convertToHeading(IRArrayValues);
+
+  for(int i = 0; i < IR_ARRAY_SIZE; i++){
+   IRArrayValues[i] =  getUnfilteredIRArrayValue(i);
+  }
 
   char telemtery[60];
   sprintf(telemtery, "%d, %d, %d, %d, %d, %d, %d, %d, %d",
           IRArrayValues[0], IRArrayValues[1], IRArrayValues[2], IRArrayValues[3],
-          IRArrayValues[4], IRArrayValues[5], IRArrayValues[6], IRArrayValues[7], heading);
+          IRArrayValues[4], IRArrayValues[5], IRArrayValues[6], IRArrayValues[7]);
   SERIAL_OUT.println(telemtery);
 }
 

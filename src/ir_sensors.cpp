@@ -45,6 +45,30 @@ void getIRArrayValues(int SIG[], int FREQ_PERIOD, int NUM_READINGS, int SAMPLE_I
   }
 }
 
+/*
+ * Get the unfiltered value for one of the IR phototransistors, select the IR phototransistor 
+ * Then read the value
+ */
+int getUnfilteredIRArrayValue(int sel)
+{
+  // Selector Pins Settings
+  int s1 = 0;
+  int s2 = 0;
+  int s3 = 0;
+
+  // Set the MUX to enabled with the ENable pin to low
+  digitalWrite(IR_EN, 0);
+
+    setSelectors(&s1, &s2, &s3, sel);
+    digitalWrite(IR_S1, s1);
+    digitalWrite(IR_S2, s2);
+    digitalWrite(IR_S3, s3);
+    return analogRead(IR_BEACON);
+  
+}
+
+
+
 // Converts the filtered array values to a heading, heading is from -7 to 7 with 0 being straight ahead
 // returns indicator value as a result if it encounters more than two pins that are above the threshold, indicating error
 double convertToHeading(int SIG[])
