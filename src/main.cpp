@@ -16,6 +16,7 @@
 #include "treasure.h"
 #include "serial_coms.h"
 #include "DuePWM.h"
+#include "Encoders.h"
 
 #include "PID_v1.h"
 
@@ -111,6 +112,7 @@ void setup()
   myPID.SetSampleTime(20);                                    // Set PID sample rate (value in ms)
   setupPWM();                                                // Adjust pwm to correct frequency for the drive motors
   setupStepper();
+  setupEncoders();
 
   display_handler.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Turn on OLED
   display_handler.display();                         // Display logo

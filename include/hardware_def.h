@@ -44,6 +44,11 @@
 #define STEPPER_LOW_POS 0
 #define STEPPER_HIGH_POS 1000 // Figure this one out with hardware testing
 
+// Encoder Pins
+#define ENCODER_LEFT_A 43
+#define ENCODER_LEFT_B 45
+#define ENCODER_RIGHT_A 47
+#define ENCODER_RIGHT_B 49
 
 // Tape Following Values
 #define TAPE_FAR_L A8
@@ -80,7 +85,7 @@
 #define CLAW_REF A2
 #define CLAW_MAG A3
 #define CLAW_END 41 //Digital
-#define CLAW_START 39 // Digital          
+#define CLAW_START 39 // Digital       
 #define PANCAKE_FOR 11 // PWM 
 #define PANCAKE_BACK 12 // PWM 
 #define ARM_SERVO 3 // PMW Pin
