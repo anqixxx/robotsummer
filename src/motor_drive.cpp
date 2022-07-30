@@ -9,7 +9,7 @@ DuePWM pwm(PWM_FREQ1, PWM_FREQ2);
  * Sets up PWM library and functions
  * Insert into main setup to run
  * */
-void pwm_setup()
+void setupPWM()
 {
     pwm.setFreq1(PWM_FREQ1);
     pwm.setFreq2(PWM_FREQ2);

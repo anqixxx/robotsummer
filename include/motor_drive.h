@@ -5,11 +5,9 @@
 
 #include <Arduino.h>
 
-//Enter in function definitions for motor drive functions, with the code located in motor_drive.cpp
-int dutycycle();
-void dutyLoop();
-void pwm_setup();
-void pwm_loop();
+// Setup the two drive motors
+void setupPWM();
+// Drive functions from -255 to 255
 void drive(int speedLeft, int speedRight);
 
 #endif

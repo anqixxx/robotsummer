@@ -39,7 +39,10 @@
 #define STEPPER_STEP 26
 #define STEPPER_DIR 28
 #define STEPPER_SLEEP 30
-#define STEPPER_LIMIT 32 // Limit switch
+#define STEPPER_LIMIT 32 
+
+#define STEPPER_LOW_POS 0
+#define STEPPER_HIGH_POS 1000 // Figure this one out with hardware testing
 
 
 // Tape Following Values
@@ -77,8 +80,8 @@
 #define CLAW_REF A2
 #define CLAW_MAG A3
 #define CLAW_END 41 //Digital
-#define CLAW_START 39 // Digital
-#define PANCAKE_FOR 11 // PWM
+#define CLAW_START 39 // Digital          
+#define PANCAKE_FOR 11 // PWM 
 #define PANCAKE_BACK 12 // PWM 
 #define ARM_SERVO 3 // PMW Pin
 

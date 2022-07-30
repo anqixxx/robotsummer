@@ -73,6 +73,7 @@ void resetRadioData();
 // Stepper motor
 void setupStepper();
 void stopStepper();
+void calibrateStepper();
 
 // Robot Mode Selection
 void selectRobotMode();
@@ -108,11 +109,11 @@ void setup()
   claw_setup();                                               //
   myPID.SetOutputLimits(-PID_OUTPUT_LIMIT, PID_OUTPUT_LIMIT); // Set the limits for the PID output values
   myPID.SetSampleTime(20);                                    // Set PID sample rate (value in ms)
-  pwm_setup();                                                // Adjust pwm to correct frequency for the drive motors
+  setupPWM();                                                // Adjust pwm to correct frequency for the drive motors
+  setupStepper();
 
   display_handler.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Turn on OLED
   display_handler.display();                         // Display logo
-
   delay(2000); // Allow logo to flash before
   dispMode();  // Display the operation mode of robot on OLED
 }
@@ -384,17 +385,30 @@ void UltrasonicTesting()
 * Stepper Functions
 */
 void setupStepper(){
+  //Setup the stepper pins and interrupt
   stepper.setMaxSpeed(1000);
   stepper.setAcceleration(1500);
   pinMode(STEPPER_SLEEP, OUTPUT);
   pinMode(STEPPER_LIMIT, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(STEPPER_LIMIT), stopStepper, FALLING);
+  digitalWrite(STEPPER_SLEEP, HIGH);  // Set the slepper to awake mode
+  calibrateStepper();
 }
 
 // ISR to prevent stepper failure
 void stopStepper(){
-  SERIAL_OUT.println("INTERRUPT!");
+  stepper.stop();
+  stepper.move(100); // Test this value for the directin of rotation
+  stepper.setCurrentPosition(0);
 }
+
+// Stepper calibration to set position to correct 0 value
+void calibrateStepper(){
+  // Move to the extreme low
+  stepper.moveTo(-3600);
+  // Let the limit switch activate and reset to a new 0 position
+}
+
 
 /*
 Radio Functions
