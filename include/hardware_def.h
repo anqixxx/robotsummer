@@ -45,10 +45,10 @@
 #define STEPPER_HIGH_POS 1000 // Figure this one out with hardware testing
 
 // Encoder Pins
-#define ENCODER_LEFT_A 43
-#define ENCODER_LEFT_B 45
-#define ENCODER_RIGHT_A 47
-#define ENCODER_RIGHT_B 49
+#define ENCODER_LEFT_A 45
+#define ENCODER_LEFT_B 47
+#define ENCODER_RIGHT_A 49
+#define ENCODER_RIGHT_B 51
 
 // Tape Following Values
 #define TAPE_FAR_L A8

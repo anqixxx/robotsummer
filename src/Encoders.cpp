@@ -26,7 +26,6 @@ pinMode(ENCODER_LEFT_A, INPUT);
 }
 
 void EncoderLAISR(){
-encoderPosLeft += 10;
 
 noInterrupts(); //stop interrupts happening before we read pin values
   bool stateENCA = digitalRead(ENCODER_LEFT_A);

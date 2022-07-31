@@ -1,5 +1,5 @@
-#ifndef Encoders_h
-#define Encoders_h
+#ifndef ENCODERS_h
+#define ENCODERS_h
 
 #include <Arduino.h>
 #include "hardware_def.h"
