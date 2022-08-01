@@ -73,7 +73,7 @@ void resetRadioData();
 
 // Stepper motor
 void setupStepper();
-void stopStepper();
+void resetStepper(); // ISR for limit switch
 void calibrateStepper();
 
 // Robot Mode Selection
@@ -98,11 +98,10 @@ void UltrasonicTesting();
 /*
 Robot mode - Select which stage of operation the robot is in
 */
-int MODE = 0; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+int MODE = 10; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
 
 void setup()
 {
-  MODE = 10; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
   setupSerialPort();
   setupRadio();                                               // Open the RC radio communications
   setupIRArray();                                             // Setup the logic pins for the IR Array
@@ -111,7 +110,7 @@ void setup()
   myPID.SetOutputLimits(-PID_OUTPUT_LIMIT, PID_OUTPUT_LIMIT); // Set the limits for the PID output values
   myPID.SetSampleTime(20);                                    // Set PID sample rate (value in ms)
   setupPWM();                                                // Adjust pwm to correct frequency for the drive motors
-  setupStepper();
+  //setupStepper();
   setupEncoders();
 
   display_handler.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Turn on OLED
@@ -222,7 +221,7 @@ void selectRobotMode()
     break;
       case 10:
       // Encoder Debugging
-    SERIAL_OUT.println(getEncoderPositionLeft());
+    outputCSV(getEncoderPositionLeft(), getEncoderPositionRight(),0,0,0);
     delay(100);
     break;
 
@@ -230,19 +229,6 @@ void selectRobotMode()
     SERIAL_OUT.println("Error");
     break;
   }
-}
-
-// Increment the MODE variable to enter into the next mode and update the OLED
-void dispMode()
-{
-  display_handler.clearDisplay();
-  display_handler.setTextSize(2);
-  display_handler.setTextColor(SSD1306_WHITE);
-  display_handler.setCursor(0, 0);
-  display_handler.println("MODE:");
-  display_handler.setTextSize(5);
-  display_handler.println(MODE);
-  display_handler.display();
 }
 
 // Manual control of robot, allows drive control and MODE select
@@ -397,23 +383,46 @@ void setupStepper(){
   stepper.setAcceleration(1500);
   pinMode(STEPPER_SLEEP, OUTPUT);
   pinMode(STEPPER_LIMIT, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(STEPPER_LIMIT), stopStepper, FALLING);
+  attachInterrupt(digitalPinToInterrupt(STEPPER_LIMIT), resetStepper, FALLING);
   digitalWrite(STEPPER_SLEEP, HIGH);  // Set the slepper to awake mode
   calibrateStepper();
 }
 
 // ISR to prevent stepper failure
-void stopStepper(){
+void resetStepper(){
   stepper.stop();
   stepper.move(100); // Test this value for the directin of rotation
+  stepper.runToPosition();
   stepper.setCurrentPosition(0);
 }
 
 // Stepper calibration to set position to correct 0 value
 void calibrateStepper(){
-  // Move to the extreme low
+ // If limit switch is active, move off of switch first
+  if (digitalRead(STEPPER_LIMIT) == LOW){
+    stepper.move(400);
+      stepper.runToPosition();}
+
+ // Move to the extreme low to trigger interrupt and position reset
   stepper.moveTo(-3600);
   // Let the limit switch activate and reset to a new 0 position
+}
+
+/* 
+* Display OLED Functions
+*/
+
+// Increment the MODE variable to enter into the next mode and update the OLED
+void dispMode()
+{
+  display_handler.clearDisplay();
+  display_handler.setTextSize(2);
+  display_handler.setTextColor(SSD1306_WHITE);
+  display_handler.setCursor(0, 0);
+  display_handler.println("MODE:");
+  display_handler.setTextSize(5);
+  display_handler.println(MODE);
+  display_handler.display();
 }
 
 
