@@ -36,19 +36,19 @@
 #define LEFT 0
 
 // Stepper Motor Pins
-#define STEPPER_STEP 26
-#define STEPPER_DIR 28
+#define STEPPER_DIR 26  // GREEN WIRE
+#define STEPPER_STEP 28
 #define STEPPER_SLEEP 30
-#define STEPPER_LIMIT 32 
+#define STEPPER_LIMIT 50 
 
 #define STEPPER_LOW_POS 0
 #define STEPPER_HIGH_POS 1000 // Figure this one out with hardware testing
 
 // Encoder Pins
-#define ENCODER_LEFT_A 45
-#define ENCODER_LEFT_B 47
-#define ENCODER_RIGHT_A 49
-#define ENCODER_RIGHT_B 51
+#define ENCODER_LEFT_A 49
+#define ENCODER_LEFT_B 51
+#define ENCODER_RIGHT_A 47
+#define ENCODER_RIGHT_B 45
 
 // Tape Following Values
 #define TAPE_FAR_L A8

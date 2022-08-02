@@ -110,7 +110,7 @@ void setup()
   myPID.SetOutputLimits(-PID_OUTPUT_LIMIT, PID_OUTPUT_LIMIT); // Set the limits for the PID output values
   myPID.SetSampleTime(20);                                    // Set PID sample rate (value in ms)
   setupPWM();                                                // Adjust pwm to correct frequency for the drive motors
-  //setupStepper();
+  setupStepper();
   setupEncoders();
 
   display_handler.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Turn on OLED
@@ -383,28 +383,43 @@ void setupStepper(){
   stepper.setAcceleration(1500);
   pinMode(STEPPER_SLEEP, OUTPUT);
   pinMode(STEPPER_LIMIT, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(STEPPER_LIMIT), resetStepper, FALLING);
   digitalWrite(STEPPER_SLEEP, HIGH);  // Set the slepper to awake mode
   calibrateStepper();
+  attachInterrupt(digitalPinToInterrupt(STEPPER_LIMIT), resetStepper, FALLING);
+  digitalWrite(STEPPER_SLEEP, LOW);  // Set the slepper to awake mode
+
 }
 
 // ISR to prevent stepper failure
 void resetStepper(){
   stepper.stop();
-  stepper.move(100); // Test this value for the directin of rotation
-  stepper.runToPosition();
-  stepper.setCurrentPosition(0);
+
+  stepper.moveTo(2000);
+
+  while (stepper.distanceToGo() > 10)
+  {
+    stepper.run();
+  }
+
 }
 
 // Stepper calibration to set position to correct 0 value
 void calibrateStepper(){
  // If limit switch is active, move off of switch first
   if (digitalRead(STEPPER_LIMIT) == LOW){
-    stepper.move(400);
+    stepper.move(1000);
       stepper.runToPosition();}
 
  // Move to the extreme low to trigger interrupt and position reset
-  stepper.moveTo(-3600);
+  stepper.moveTo(-8000);
+
+  int time = millis();
+  while (digitalRead(STEPPER_LIMIT) == HIGH && millis()-time < 3000){
+    stepper.run();
+  }
+  stepper.move(500);
+  stepper.runToPosition();
+  stepper.setCurrentPosition(0);
   // Let the limit switch activate and reset to a new 0 position
 }
 

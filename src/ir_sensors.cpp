@@ -126,12 +126,6 @@ for (int i = 0; i < IR_ARRAY_SIZE; i++)
     COPY[min] = temp;
   }
 
-  //       char telemtery[60];
-  // sprintf(telemtery, "%d, %d, %d, %d, %d, %d, %d, %d",
-  //         COPY[0], COPY[1], COPY[2], COPY[3],
-  //         COPY[4], COPY[5], COPY[6], COPY[7]);
-  // SERIAL_OUT.println(telemtery);
-
   // Find average of four minimum values
   for (i = 0; i < IR_ARRAY_SIZE/2; i++){
     threshold += COPY[i];

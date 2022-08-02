@@ -11,9 +11,12 @@ void EncoderLBISR();
 void EncoderRAISR();
 void EncoderRBISR();
 
+
+// Get the encoder positions
 int getEncoderPositionLeft();
 int getEncoderPositionRight();
 
+// Reset both encoders
 void resetEncoders();
 
 #endif
