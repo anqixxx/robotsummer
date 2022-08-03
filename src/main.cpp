@@ -17,6 +17,7 @@
 #include "serial_coms.h"
 #include "DuePWM.h"
 #include "Encoders.h"
+#include "Bridge.h"
 
 #include "PID_v1.h"
 
@@ -66,6 +67,9 @@ PID myPID(&pidInput, &pidOutput, &pidSetpoint, 2, 0, 0, DIRECT);
 // OLED handler
 Adafruit_SSD1306 display_handler(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
+// Bridge mechanism
+Bridge myBridge(BRIDGE_PIN);
+
 // RC Functions
 void rcloop();
 void setupRadio();
@@ -110,7 +114,8 @@ void setup()
   myPID.SetOutputLimits(-PID_OUTPUT_LIMIT, PID_OUTPUT_LIMIT); // Set the limits for the PID output values
   myPID.SetSampleTime(20);                                    // Set PID sample rate (value in ms)
   setupPWM();                                                // Adjust pwm to correct frequency for the drive motors
-  setupStepper();
+  myBridge.setup();
+  //setupStepper();
   setupEncoders();
 
   display_handler.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Turn on OLED
