@@ -18,6 +18,7 @@
 #include "DuePWM.h"
 #include "Encoders.h"
 #include "Bridge.h"
+#include "RadioData.h"
 
 #include "PID_v1.h"
 
@@ -28,27 +29,7 @@ RF24 radio(CE, CNS); // nRF24L01 (CE, CSN)
 const byte address[6] = "00001";
 unsigned long lastReceiveTime = 0;
 unsigned long currentTime = 0;
-
-// Max size of this struct is 32 bytes - NRF24L01 buffer limit
-struct Data_Package
-{
-  byte j1PotX;
-  byte j1PotY;
-  byte j1Button;
-  byte j2PotX;
-  byte j2PotY;
-  byte j2Button;
-  byte pot1;
-  byte pot2;
-  byte tSwitch1;
-  byte tSwitch2;
-  byte button1;
-  byte button2;
-  byte button3;
-  byte button4;
-};
-
-Data_Package data;
+RadioData data;
 
 /*
 * Stepper motor definition
@@ -454,7 +435,7 @@ void rcloop()
   // Check whether there is data to be received
   if (radio.available())
   {
-    radio.read(&data, sizeof(Data_Package)); // Read the whole data and store it into the 'data' structure
+    radio.read(&data, sizeof(RadioData)); // Read the whole data and store it into the 'data' structure
     lastReceiveTime = millis();              // At this moment we have received the data
   }
   // Check whether we keep receving data, or we have a connection between the two modules
