@@ -15,6 +15,8 @@ void claw_servo_pos(int position);
 
 void claw_loop();
 
+void test_claw_loop();
+
 void claw_limitswitch();
 
 void claw_forward();

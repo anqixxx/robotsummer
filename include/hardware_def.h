@@ -5,7 +5,7 @@
 
 // Serial 3 is the TX RX port #3 (connect to BT)
 // Serial is the USB programming port
-#define SERIAL_OUT Serial
+#define SERIAL_OUT Serial3
 #define SERIAL_RATE 9600
 
 // OLED Display
@@ -20,10 +20,10 @@
 // Motor frequencies and pins
 #define PWM_FREQ1  100
 #define PWM_FREQ2  100
-#define L_MOTOR_FORWARD 6 // PMW
-#define L_MOTOR_REV 7 // PMW
-#define R_MOTOR_FORWARD 8 // PMW
-#define R_MOTOR_REV 9 // PMW
+#define L_MOTOR_FORWARD 8// PMW
+#define L_MOTOR_REV 9// PMW
+#define R_MOTOR_FORWARD 7 // PMW
+#define R_MOTOR_REV 6 // PMW
 
 // Drive Speeds
 #define FULL 255
@@ -39,7 +39,7 @@
 #define STEPPER_DIR 26  // GREEN WIRE
 #define STEPPER_STEP 28
 #define STEPPER_SLEEP 30
-#define STEPPER_LIMIT 50 
+#define STEPPER_LIMIT 37 
 
 #define STEPPER_LOW_POS 0
 #define STEPPER_HIGH_POS 1000 // Figure this one out with hardware testing

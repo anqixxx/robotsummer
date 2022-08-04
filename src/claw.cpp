@@ -3,8 +3,8 @@
 #include "hardware_def.h"
 #include <Servo.h>
 
-#define CLOSE 0
-#define OPEN 180
+#define CLOSE 20
+#define OPEN 120
 #define CLAW_REF_THRES 40
 #define CLAW_MAG_THRES 1020
 
@@ -94,8 +94,8 @@ void claw_loop(){
   claw_servo_pos(OPEN);
 
   timer = millis();
-  while(digitalRead(CLAW_END) && millis()-timer < 1500){
-    claw_forward();
+ while(digitalRead(CLAW_END) && millis()-timer < 1500){
+   claw_forward();
   }
 
   // Sets initial angle as 40, to allow for sweep
@@ -134,6 +134,7 @@ void claw_loop(){
 
 void test_claw_loop(){
   //initally opens claw, assume start position is at CLAW_START
+
   claw_servo_pos(OPEN);
 
   if (analogRead(CLAW_REF) < CLAW_REF_THRES){

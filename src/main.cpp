@@ -18,7 +18,8 @@
 #include "DuePWM.h"
 #include "Encoders.h"
 #include "Bridge.h"
-#include "RadioData.h"
+#include "Stepper.h"
+
 
 #include "PID_v1.h"
 
@@ -29,13 +30,27 @@ RF24 radio(CE, CNS); // nRF24L01 (CE, CSN)
 const byte address[6] = "00001";
 unsigned long lastReceiveTime = 0;
 unsigned long currentTime = 0;
-RadioData data;
 
-/*
-* Stepper motor definition
-*/
-AccelStepper stepper(AccelStepper::DRIVER, STEPPER_STEP, STEPPER_DIR);
-int stepperPosition = 0;
+struct Data_Package
+{
+  byte j1PotX;
+  byte j1PotY;
+  byte j1Button;
+  byte j2PotX;
+  byte j2PotY;
+  byte j2Button;
+  byte pot1;
+  byte pot2;
+  byte tSwitch1;
+  byte tSwitch2;
+  byte button1;
+  byte button2;
+  byte button3;
+  byte button4;
+};
+
+Data_Package data;
+
 
 /*
 IR PID Controller and variables
@@ -83,20 +98,23 @@ void UltrasonicTesting();
 /*
 Robot mode - Select which stage of operation the robot is in
 */
-int MODE = 10; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+int MODE = 5; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
 
 void setup()
 {
   setupSerialPort();
   setupRadio();                                               // Open the RC radio communications
   setupIRArray();                                             // Setup the logic pins for the IR Array
-  ultra_setup();                                              // Sets up sonars
-  claw_setup();                                               //
+  pinMode(PANCAKE_FOR, OUTPUT);
+  pinMode(PANCAKE_BACK, OUTPUT);
+  ultra_setup(); 
+                                               // Sets up sonars
+  //claw_setup();                                               //
   myPID.SetOutputLimits(-PID_OUTPUT_LIMIT, PID_OUTPUT_LIMIT); // Set the limits for the PID output values
   myPID.SetSampleTime(20);                                    // Set PID sample rate (value in ms)
   setupPWM();                                                // Adjust pwm to correct frequency for the drive motors
   myBridge.setup();
-  //setupStepper();
+  setupStepper();
   setupEncoders();
 
   display_handler.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Turn on OLED
@@ -167,8 +185,12 @@ void selectRobotMode()
 
     break;
   case 3:
-    // claw_loop();
-    break;
+ claw_servo_pos(120);
+ delay(7000);
+  claw_servo_pos(20);
+   delay(6000);
+
+      break;
   case 4:
   // Test case for transition off tape to beacon
   // IDEA: unlike chicken wire, use the alignment of an unfiltered beacon signal to trigger transition through the
@@ -206,9 +228,7 @@ void selectRobotMode()
     SERIAL_OUT.println("End of automation sequence");
     break;
       case 10:
-      // Encoder Debugging
-    outputCSV(getEncoderPositionLeft(), getEncoderPositionRight(),0,0,0);
-    delay(100);
+
     break;
 
   case -1:
@@ -221,10 +241,31 @@ void selectRobotMode()
 void manualMode()
 {
   // Normalize drive values to -255 to 255 range
-  int leftMotor = (data.j1PotY - 128) * 1.9;
-  int rightMotor = (data.j2PotY - 128) * 1.9;
+  int leftMotor = (data.j1PotY +3 - 128) * 1.9;
+  int rightMotor = (data.j2PotY + 1 - 128) * 1.9;
+
+  if (leftMotor < 10 && leftMotor > -10){
+    leftMotor = 0;
+  }
+    if (rightMotor < 10 && rightMotor > -10){
+    rightMotor = 0;
+  }
+
   drive(leftMotor, rightMotor);
-  outputCSV(leftMotor, rightMotor, data.tSwitch2, 0, MODE);
+  outputCSV(leftMotor, rightMotor, data.tSwitch2, data.pot2*15, MODE);
+
+  moveStepper(data.pot2*15);
+
+  if(data.j2PotX > 220){
+    digitalWrite(PANCAKE_FOR, HIGH);
+    digitalWrite(PANCAKE_BACK,LOW);
+  } else if (data.j2PotX < 20){
+        digitalWrite(PANCAKE_FOR, LOW);
+    digitalWrite(PANCAKE_BACK,HIGH);
+  } else {
+        digitalWrite(PANCAKE_FOR, LOW);
+    digitalWrite(PANCAKE_BACK,LOW);
+  }
 
   // Use button 1 to increment MODE to start robot in desired state
   // When automatic drive is toggled
@@ -245,26 +286,26 @@ void manualMode()
     dispMode();
   }
 
-  if (data.button3 == 0)
-  {
-    while (digitalRead(CLAW_START))
-    {
-      claw_backward();
-    }
-    resetRadioData();
-    delay(100);
-    setupRadio();
-  }
-  else if (data.button4 == 0)
-  {
-    while (digitalRead(CLAW_END))
-    {
-      claw_forward();
-    }
-    resetRadioData();
-    delay(100);
-    setupRadio();
-  }
+  // if (data.button3 == 0)
+  // {
+  //   while (digitalRead(CLAW_START))
+  //   {
+  //     claw_backward();
+  //   }
+  //   resetRadioData();
+  //   delay(100);
+  //   setupRadio();
+  // }
+  // else if (data.button4 == 0)
+  // {
+  //   while (digitalRead(CLAW_END))
+  //   {
+  //     claw_forward();
+  //   }
+  //   resetRadioData();
+  //   delay(100);
+  //   setupRadio();
+  // }
 }
 
 // Move from main course to treasure 1, can we hardcode this?  seems straightforward
@@ -360,54 +401,7 @@ void UltrasonicTesting()
 }
 
 
-/*
-* Stepper Functions
-*/
-void setupStepper(){
-  //Setup the stepper pins and interrupt
-  stepper.setMaxSpeed(1000);
-  stepper.setAcceleration(1500);
-  pinMode(STEPPER_SLEEP, OUTPUT);
-  pinMode(STEPPER_LIMIT, INPUT_PULLUP);
-  digitalWrite(STEPPER_SLEEP, HIGH);  // Set the slepper to awake mode
-  calibrateStepper();
-  attachInterrupt(digitalPinToInterrupt(STEPPER_LIMIT), resetStepper, FALLING);
-  digitalWrite(STEPPER_SLEEP, LOW);  // Set the slepper to awake mode
 
-}
-
-// ISR to prevent stepper failure
-void resetStepper(){
-  stepper.stop();
-
-  stepper.moveTo(2000);
-
-  while (stepper.distanceToGo() > 10)
-  {
-    stepper.run();
-  }
-
-}
-
-// Stepper calibration to set position to correct 0 value
-void calibrateStepper(){
- // If limit switch is active, move off of switch first
-  if (digitalRead(STEPPER_LIMIT) == LOW){
-    stepper.move(1000);
-      stepper.runToPosition();}
-
- // Move to the extreme low to trigger interrupt and position reset
-  stepper.moveTo(-8000);
-
-  int time = millis();
-  while (digitalRead(STEPPER_LIMIT) == HIGH && millis()-time < 3000){
-    stepper.run();
-  }
-  stepper.move(500);
-  stepper.runToPosition();
-  stepper.setCurrentPosition(0);
-  // Let the limit switch activate and reset to a new 0 position
-}
 
 /* 
 * Display OLED Functions
@@ -435,7 +429,7 @@ void rcloop()
   // Check whether there is data to be received
   if (radio.available())
   {
-    radio.read(&data, sizeof(RadioData)); // Read the whole data and store it into the 'data' structure
+    radio.read(&data, sizeof(Data_Package)); // Read the whole data and store it into the 'data' structure
     lastReceiveTime = millis();              // At this moment we have received the data
   }
   // Check whether we keep receving data, or we have a connection between the two modules
