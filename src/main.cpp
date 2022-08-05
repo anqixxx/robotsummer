@@ -65,15 +65,6 @@ PID myPID(&pidInput, &pidOutput, &pidSetpoint, 2, 0, 0, DIRECT);
 // OLED handler
 Adafruit_SSD1306 display_handler(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-// Bridge mechanism
-Bridge myBridge(BRIDGE_PIN);
-
-    ClawClass claw = ClawClass(CLAW_SERVO);
-    
-    Arm robtoArm(PANCAKE_FOR, PANCAKE_BACK, 
-    ARM_LIMIT_START, ARM_LIMIT_END, 
-    ARM_SERVO_TOP, ARM_SERVO_BOTTOM);
-
 // RC Functions
 void rcloop();
 void setupRadio();
@@ -83,6 +74,9 @@ void resetRadioData();
 void setupStepper();
 void resetStepper(); // ISR for limit switch
 void calibrateStepper();
+
+// Robot arm pinModes
+void setArmPins();
 
 // Robot Mode Selection
 void selectRobotMode();
@@ -106,18 +100,10 @@ void UltrasonicTesting();
 /*
 Robot mode - Select which stage of operation the robot is in
 */
-<<<<<<< HEAD
-int MODE = 2; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
-
-void setup()
-{
-  MODE = 2; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
-=======
 int MODE = 5; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
 
 void setup()
 {
->>>>>>> 64261dc6761b9ba74a26c05c62a9193353392c4b
   setupSerialPort();
   setupRadio();                                               // Open the RC radio communications
   setupIRArray();                                             // Setup the logic pins for the IR Array
@@ -131,17 +117,22 @@ void setup()
   setupPWM();                                                // Adjust pwm to correct frequency for the drive motors
   myBridge.setup();
   setupEncoders();
+  setupStepper();
+  moveStepper(ARM_HEIGHT_HIGH); // Set the arm height to high
 
   display_handler.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Turn on OLED
   display_handler.display();                         // Display logo
-  delay(2000); // Allow logo to flash before
+  delay(1000); // Allow logo to flash before
   dispMode();  // Display the operation mode of robot on OLED
+  setArmPins();
 }
 
 void loop()
 {
+
+
   while(1){
-    SERIAL_OUT.println(digitalRead(ARM_LIMIT_END));
+    test_claw_loop();
   }
   // Check RC input
   rcloop();
@@ -190,16 +181,6 @@ void selectRobotMode()
     moveToTreasure1();
     break;
   case 2:
-<<<<<<< HEAD
-//120 slightly open
-claw_servo_pos(180);
-Serial.print("Open");
-delay(2000);
-claw_servo_pos(120);
-Serial.print("Close");
-delay(6000);
-  break;
-=======
   // Make a sweep for the treasure
     for (int angle = 40; angle < 140; angle++)
     {
@@ -212,7 +193,6 @@ delay(6000);
     dispMode();
 
     break;
->>>>>>> 64261dc6761b9ba74a26c05c62a9193353392c4b
   case 3:
  claw_servo_pos(120);
  delay(7000);
@@ -449,6 +429,12 @@ void dispMode()
   display_handler.display();
 }
 
+
+// Arm pin setup
+void setArmPins(){
+    pinMode(ARM_LIMIT_END, INPUT_PULLUP);
+    pinMode(ARM_LIMIT_START, INPUT_PULLUP);
+}
 
 /*
 Radio Functions

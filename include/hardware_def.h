@@ -5,7 +5,7 @@
 
 // Serial 3 is the TX RX port #3 (connect to BT)
 // Serial is the USB programming port
-#define SERIAL_OUT Serial3
+#define SERIAL_OUT Serial
 #define SERIAL_RATE 9600
 
 // OLED Display

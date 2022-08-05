@@ -4,6 +4,7 @@
 #include "Arm.h"
 #include "Stepper.h"
 #include "ClawClass.h"
+#include "serial_coms.h"
 
 Arm::Arm(byte pinPancakeF, byte pinPancakeB,
          byte pinLimitStart, byte pinLimitEnd,
@@ -22,25 +23,27 @@ void Arm::setup()
 {
     pinMode(horzLeadBackward, OUTPUT);
     pinMode(horzLeadForward, OUTPUT);
-    pinMode(limitEnd, INPUT_PULLUP);
-    pinMode(limitStart, INPUT_PULLUP);
     pinMode(horzLeadBackward, OUTPUT);
     pinMode(horzLeadForward, OUTPUT);
 
     moveClawOut();   // Move the claw out for stepper calibration
-    setupStepper();    // Initiate the stepper with calibration
-    moveStepper(ARM_HEIGHT_HIGH); // Set the arm height to high
+
+
 }
 
 // Move the claw back in, stops the attempt after 2 seconds if not successful
 void Arm::moveClawIn(){
+    int limit = digitalRead(ARM_LIMIT_START);
     int startTime = millis();
-    while (isOut && (millis()-startTime < HORZ_WAIT_TIME)){
+    while (limit && (millis()-startTime < HORZ_WAIT_TIME)){
         digitalWrite(horzLeadBackward, HIGH);
         digitalWrite(horzLeadForward, LOW);
-        isOut = (digitalRead(limitStart) == HIGH ); // Read the limit switch
+        limit = (digitalRead(ARM_LIMIT_START)== HIGH);
+        outputCSV(limit,0,0,0,0);
     }
     digitalWrite(horzLeadBackward, LOW);
+    digitalWrite(horzLeadForward, HIGH);
+    delay(50);
     digitalWrite(horzLeadForward, LOW);
     isOut = false;
 }
@@ -48,13 +51,17 @@ void Arm::moveClawIn(){
 // Move the claw out, stops the attempt after 2 seconds if not successful
 void Arm::moveClawOut(){
     int startTime = millis();
-    while (!isOut && (millis()-startTime < HORZ_WAIT_TIME)){
+    int limit = digitalRead(ARM_LIMIT_END);
+    while (limit && (millis()-startTime < HORZ_WAIT_TIME)){
         digitalWrite(horzLeadBackward, LOW);
         digitalWrite(horzLeadForward, HIGH);
-        isOut = (digitalRead(limitEnd) == LOW ); // Read the limit switch
+        limit = (digitalRead(ARM_LIMIT_END)== HIGH);
+                outputCSV(0,1,0,0,0);
     }
-    digitalWrite(horzLeadBackward, LOW);
+    digitalWrite(horzLeadBackward, HIGH);
     digitalWrite(horzLeadForward, LOW);
+    delay(50);
+    digitalWrite(horzLeadBackward, LOW);
     isOut = true;
 }
 
