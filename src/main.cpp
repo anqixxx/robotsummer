@@ -98,18 +98,10 @@ void UltrasonicTesting();
 /*
 Robot mode - Select which stage of operation the robot is in
 */
-<<<<<<< HEAD
-int MODE = 2; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+int MODE = 3; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
 
 void setup()
 {
-  MODE = 2; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
-=======
-int MODE = 5; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
-
-void setup()
-{
->>>>>>> 64261dc6761b9ba74a26c05c62a9193353392c4b
   setupSerialPort();
   setupRadio();                                               // Open the RC radio communications
   setupIRArray();                                             // Setup the logic pins for the IR Array
@@ -180,36 +172,10 @@ void selectRobotMode()
     moveToTreasure1();
     break;
   case 2:
-<<<<<<< HEAD
-//120 slightly open
-claw_servo_pos(180);
-Serial.print("Open");
-delay(2000);
-claw_servo_pos(120);
-Serial.print("Close");
-delay(6000);
-  break;
-=======
-  // Make a sweep for the treasure
-    for (int angle = 40; angle < 140; angle++)
-    {
-      arm_servo_pos(angle);
-      delay(100);
-    }
-    arm_servo_pos(0);
-    delay(300);
-    MODE++;
-    dispMode();
-
     break;
->>>>>>> 64261dc6761b9ba74a26c05c62a9193353392c4b
   case 3:
- claw_servo_pos(120);
- delay(7000);
-  claw_servo_pos(20);
-   delay(6000);
-
-      break;
+    claw_test_value();
+    break;
   case 4:
   // Test case for transition off tape to beacon
   // IDEA: unlike chicken wire, use the alignment of an unfiltered beacon signal to trigger transition through the

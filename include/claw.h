@@ -7,25 +7,15 @@
 
 //Enter in function definitions for claw movement, with the code located in claw.cpp
 
-void claw_setup();
-
-void servo_loop();
-
-void claw_servo_pos(int position);
-
 void claw_loop();
 
 void test_claw_loop();
 
-void claw_limitswitch();
-
-void claw_forward();
-
-void claw_backward();
-
 void stopBackwardPancakeMotor();
 
 void stopForwardPancakeMotor();
+
+void claw_test_value();
 
 void arm_servo_pos(int position);
 
