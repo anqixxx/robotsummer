@@ -7,8 +7,8 @@
 
 #define CLOSE 120
 #define OPEN 180
-#define CLAW_REF_THRES 80
-#define CLAW_DET_THRES 300
+#define CLAW_REF_THRES 70
+#define CLAW_DET_THRES 150
 #define CLAW_MAG_THRES 1020
 #define ARMSTART 0
 #define ARMEND 180
