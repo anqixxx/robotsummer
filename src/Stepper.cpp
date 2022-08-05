@@ -84,3 +84,7 @@ void moveStepper(int position)
     }
      digitalWrite(STEPPER_SLEEP, LOW);
 }
+
+int getCurrentStepperPos(){
+    return stepper.currentPosition();
+}
