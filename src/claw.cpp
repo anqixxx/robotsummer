@@ -10,11 +10,11 @@
 #define CLAW_REF_THRES 40
 #define CLAW_MAG_THRES 1020
 
-    ClawClass claw = ClawClass(CLAW_SERVO);
-    
-    Arm robtoArm(PANCAKE_FOR, PANCAKE_BACK, 
-    ARM_LIMIT_START, ARM_LIMIT_END, 
-    ARM_SERVO_TOP, ARM_SERVO_BOTTOM);
+    // ClawClass claw = ClawClass(CLAW_SERVO);
+
+    // Arm robtoArm(PANCAKE_FOR, PANCAKE_BACK, 
+    // ARM_LIMIT_START, ARM_LIMIT_END, 
+    // ARM_SERVO_TOP, ARM_SERVO_BOTTOM);
 
 
 // Now define the main code for the functions listed in the header file

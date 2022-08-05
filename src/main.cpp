@@ -19,6 +19,8 @@
 #include "Encoders.h"
 #include "Bridge.h"
 #include "Stepper.h"
+#include "Arm.h"
+#include "ClawClass.h"
 
 
 #include "PID_v1.h"
@@ -65,6 +67,12 @@ Adafruit_SSD1306 display_handler(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET)
 
 // Bridge mechanism
 Bridge myBridge(BRIDGE_PIN);
+
+    ClawClass claw = ClawClass(CLAW_SERVO);
+    
+    Arm robtoArm(PANCAKE_FOR, PANCAKE_BACK, 
+    ARM_LIMIT_START, ARM_LIMIT_END, 
+    ARM_SERVO_TOP, ARM_SERVO_BOTTOM);
 
 // RC Functions
 void rcloop();
@@ -114,7 +122,6 @@ void setup()
   myPID.SetSampleTime(20);                                    // Set PID sample rate (value in ms)
   setupPWM();                                                // Adjust pwm to correct frequency for the drive motors
   myBridge.setup();
-  setupStepper();
   setupEncoders();
 
   display_handler.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Turn on OLED
@@ -125,6 +132,9 @@ void setup()
 
 void loop()
 {
+  while(1){
+    SERIAL_OUT.println(digitalRead(ARM_LIMIT_END));
+  }
   // Check RC input
   rcloop();
   // Right side toggle switch in up position is indicator for manual mode
