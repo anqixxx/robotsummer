@@ -79,16 +79,24 @@
 #define PID_P_TUNING 21
 #define PID_I_TUNING 9
 
+// Robot Arm
+
+#define ARM_SERVO_TOP 2 // PMW Pin
+#define ARM_SERVO_BOTTOM 3 // PMW Pin
+#define ARM_LIMIT_END 41 //Digital
+#define ARM_LIMIT_START 39 // Digital       
+#define PANCAKE_FOR 11 // PWM 
+#define PANCAKE_BACK 12 // PWM 
+
 
 // Claw Values
 #define CLAW_SERVO 4 // PMW Pin
 #define CLAW_REF A2
 #define CLAW_MAG A3
-#define CLAW_END 41 //Digital
-#define CLAW_START 39 // Digital       
-#define PANCAKE_FOR 11 // PWM 
-#define PANCAKE_BACK 12 // PWM 
-#define ARM_SERVO 3 // PMW Pin
+#define CLAW_MAX 180  
+#define CLAW_MIN 120
+
+
 
 // Sonars
 #define RIGHT_TRIG_PIN 38 // Digital
