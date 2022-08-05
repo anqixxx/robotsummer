@@ -65,6 +65,9 @@ PID myPID(&pidInput, &pidOutput, &pidSetpoint, 2, 0, 0, DIRECT);
 // OLED handler
 Adafruit_SSD1306 display_handler(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
+// Bridge mechanism
+Bridge myBridge(BRIDGE_PIN);
+
 // RC Functions
 void rcloop();
 void setupRadio();
@@ -100,11 +103,7 @@ void UltrasonicTesting();
 /*
 Robot mode - Select which stage of operation the robot is in
 */
-<<<<<<< HEAD
 int MODE = 5; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
-=======
-int MODE = 3; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
->>>>>>> cf3df9e7f087cf0be94d9d6ce781a4b49eafde49
 
 void setup()
 {
@@ -185,7 +184,6 @@ void selectRobotMode()
     moveToTreasure1();
     break;
   case 2:
-<<<<<<< HEAD
   // Make a sweep for the treasure
     for (int angle = 40; angle < 140; angle++)
     {
@@ -197,12 +195,14 @@ void selectRobotMode()
     MODE++;
     dispMode();
 
-=======
->>>>>>> cf3df9e7f087cf0be94d9d6ce781a4b49eafde49
     break;
   case 3:
-    claw_test_value();
-    break;
+ claw_servo_pos(120);
+ delay(7000);
+  claw_servo_pos(20);
+   delay(6000);
+
+      break;
   case 4:
   // Test case for transition off tape to beacon
   // IDEA: unlike chicken wire, use the alignment of an unfiltered beacon signal to trigger transition through the
