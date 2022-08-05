@@ -91,11 +91,11 @@ void UltrasonicTesting();
 /*
 Robot mode - Select which stage of operation the robot is in
 */
-int MODE = 1; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+int MODE = 2; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
 
 void setup()
 {
-  MODE = 3; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+  MODE = 2; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
   setupSerialPort();
   setupRadio();                                                 // Open the RC radio communications
   setupIRArray();                                          // Setup the logic pins for the IR Array
@@ -162,7 +162,13 @@ void selectRobotMode()
     moveToTreasure1();
     break;
   case 2:
-    claw_loop();
+//120 slightly open
+claw_servo_pos(180);
+Serial.print("Open");
+delay(2000);
+claw_servo_pos(120);
+Serial.print("Close");
+delay(6000);
   break;
   case 3:
   break;
