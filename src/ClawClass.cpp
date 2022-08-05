@@ -3,8 +3,6 @@
 #include "Servo.h"
 #include "ClawClass.h"
 
-
-
 ClawClass::ClawClass(byte pinServo)
 {
     servo.attach(pinServo);
@@ -22,13 +20,15 @@ void ClawClass::reposition(int pos){
 
 int ClawClass::getReflectance(){
     reflectance = analogRead(CLAW_REF);
-
+    Serial.println("Reflectance: ");
+    Serial.println(reflectance);
     return reflectance;
 }
 
 int ClawClass::getHall(){
     hall = analogRead(CLAW_MAG);
-
+    Serial.println("Magnetic: ");
+    Serial.println(hall);
     return hall;
 }
 
