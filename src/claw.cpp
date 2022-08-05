@@ -5,7 +5,7 @@
 #include "ClawClass.h"
 #include "Arm.h"
 
-#define CLOSE 120
+#define CLOSE 125
 #define OPEN 180
 #define CLAW_REF_THRES 70
 #define CLAW_DET_THRES 150
@@ -27,6 +27,8 @@ void stopBackwardPancakeMotor();
     ------
     Loop for picking up treasures
 **/
+
+
 void claw_loop(){
   //initally opens claw, assume start position is at CLAW_START
   claw.reposition(OPEN);
@@ -41,7 +43,7 @@ void claw_loop(){
   for (int angle = ARMSTART; angle < ARMEND && claw.getReflectance() > CLAW_REF_THRES; angle++)
   {
     robotArm.setAngle(angle);
-    delay(15);
+    delay(400);
   }
 
   if(claw.getHall() < CLAW_MAG_THRES){

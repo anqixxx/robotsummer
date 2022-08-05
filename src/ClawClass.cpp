@@ -6,6 +6,7 @@
 ClawClass::ClawClass(byte pinServo)
 {
     servo.attach(pinServo);
+    servo.write(180);
 }
 
 void ClawClass::reposition(int pos){

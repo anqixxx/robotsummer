@@ -103,7 +103,7 @@ void UltrasonicTesting();
 /*
 Robot mode - Select which stage of operation the robot is in
 */
-int MODE = 5; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+int MODE = 2; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
 
 void setup()
 {
@@ -112,6 +112,7 @@ void setup()
   setupIRArray();                                             // Setup the logic pins for the IR Array
   pinMode(PANCAKE_FOR, OUTPUT);
   pinMode(PANCAKE_BACK, OUTPUT);
+
   ultra_setup(); 
                                                // Sets up sonars
   //claw_setup();                                               //
@@ -133,10 +134,6 @@ void setup()
 void loop()
 {
 
-
-  while(1){
-    test_claw_loop();
-  }
   // Check RC input
   rcloop();
   // Right side toggle switch in up position is indicator for manual mode
@@ -185,22 +182,11 @@ void selectRobotMode()
     break;
   case 2:
   // Make a sweep for the treasure
-    for (int angle = 40; angle < 140; angle++)
-    {
-      arm_servo_pos(angle);
-      delay(100);
-    }
-    arm_servo_pos(0);
-    delay(300);
-    MODE++;
-    dispMode();
+    claw_loop();
 
     break;
   case 3:
- claw_servo_pos(120);
- delay(7000);
-  claw_servo_pos(20);
-   delay(6000);
+
 
       break;
   case 4:

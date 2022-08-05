@@ -83,14 +83,14 @@
 
 #define ARM_SERVO_TOP 2 // PMW Pin
 #define ARM_SERVO_BOTTOM 3 // PMW Pin
-#define ARM_LIMIT_END 41 //Digital
-#define ARM_LIMIT_START 39 // Digital       
-#define PANCAKE_FOR 11 // PWM 
-#define PANCAKE_BACK 12 // PWM 
+#define ARM_LIMIT_END 39 //Digital
+#define ARM_LIMIT_START 41 // Digital       
+#define PANCAKE_FOR 12 // PWM 
+#define PANCAKE_BACK 11 // PWM 
 
 
 // Claw Values
-#define CLAW_SERVO 4 // PMW Pin
+#define CLAW_SERVO 34 // PMW Pin
 #define CLAW_REF A2
 #define CLAW_MAG A3
 #define CLAW_MAX 180  
