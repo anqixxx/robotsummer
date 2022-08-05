@@ -20,11 +20,10 @@
 // Motor frequencies and pins
 #define PWM_FREQ1  100
 #define PWM_FREQ2  100
-#define L_MOTOR_FORWARD 6 // PMW
-#define L_MOTOR_REV 7 // PMW
-#define R_MOTOR_FORWARD 8 // PMW
-#define R_MOTOR_REV 9 // PMW
-
+#define L_MOTOR_FORWARD 8// PMW
+#define L_MOTOR_REV 9// PMW
+#define R_MOTOR_FORWARD 7 // PMW
+#define R_MOTOR_REV 6 // PMW
 
 // Drive Speeds
 #define FULL 255
@@ -36,8 +35,20 @@
 #define RIGHT 1
 #define LEFT 0
 
-#define POT1 A0
-#define POT2 A1
+// Stepper Motor Pins
+#define STEPPER_DIR 26  // GREEN WIRE
+#define STEPPER_STEP 28
+#define STEPPER_SLEEP 30
+#define STEPPER_LIMIT 37 
+
+#define STEPPER_LOW_POS 0
+#define STEPPER_HIGH_POS 1000 // Figure this one out with hardware testing
+
+// Encoder Pins
+#define ENCODER_LEFT_A 49
+#define ENCODER_LEFT_B 51
+#define ENCODER_RIGHT_A 47
+#define ENCODER_RIGHT_B 45
 
 // Tape Following Values
 #define TAPE_FAR_L A8
@@ -65,23 +76,36 @@
 #define TOO_MANY_SIGNALS 8 // Flag for too many IR sensors being pinged by beacon
 
 #define PID_OUTPUT_LIMIT 100 // Sets the limits for positive or negative on the PID output
+#define PID_P_TUNING 21
+#define PID_I_TUNING 9
 
+// Robot Arm
+
+#define ARM_SERVO_TOP 2 // PMW Pin
+#define ARM_SERVO_BOTTOM 3 // PMW Pin
+#define ARM_LIMIT_END 41 //Digital
+#define ARM_LIMIT_START 39 // Digital       
+#define PANCAKE_FOR 11 // PWM 
+#define PANCAKE_BACK 12 // PWM 
 
 
 // Claw Values
 #define CLAW_SERVO 4 // PMW Pin
 #define CLAW_REF A2
 #define CLAW_MAG A3
-#define CLAW_END 41 //Digital
-#define CLAW_START 39 // Digital
-#define PANCAKE_FOR 11 // PWM
-#define PANCAKE_BACK 12 // PWM 
-#define ARM_SERVO 3 // PMW Pin
+#define CLAW_MAX 180  
+#define CLAW_MIN 120
+
+
 
 // Sonars
 #define RIGHT_TRIG_PIN 38 // Digital
 #define RIGHT_ECHO_PIN 40 // Digital
 #define LEFT_TRIG_PIN 34 // Digital
 #define LEFT_ECHO_PIN 36 // Digital
+
+//Bridge Deployment
+#define BRIDGE_PIN 42     // Pin for the bridge servo
+#define BRIDGE_CLOSE 140 // servo setting for a closed latch
 
 #endif

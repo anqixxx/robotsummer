@@ -14,6 +14,9 @@ double getHeadingToBeacon(int FREQ_PERIOD, int NUM_READINGS, int SAMPLE_INTERVAL
 // Returns the filtered amplitude for an array of 8 IR phototransistors
 void getIRArrayValues(int SIG[], int FREQ_PERIOD, int NUM_READINGS, int SAMPLE_INTERVAL, int NUM_OFFSETS);
 
+// Returns the unfiltered amplitudes for any IR signal coming in
+int getUnfilteredIRArrayValue(int sel);
+
 // Convert an array of IR readings and a threshold to a heading indication.  
 // Heading is from -7 to 7 indicating direction of beacon, negative is left, positive right
 double convertToHeading(int[]);

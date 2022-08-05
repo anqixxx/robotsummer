@@ -2,11 +2,19 @@
 #include "claw.h"
 #include "hardware_def.h"
 #include <Servo.h>
+#include "ClawClass.h"
+#include "Arm.h"
 
-#define CLOSE 110
-#define OPEN 180
+#define CLOSE 20
+#define OPEN 120
 #define CLAW_REF_THRES 40
 #define CLAW_MAG_THRES 1020
+
+    ClawClass claw = ClawClass(CLAW_SERVO);
+    
+    Arm robtoArm(PANCAKE_FOR, PANCAKE_BACK, 
+    ARM_LIMIT_START, ARM_LIMIT_END, 
+    ARM_SERVO_TOP, ARM_SERVO_BOTTOM);
 
 
 // Now define the main code for the functions listed in the header file
@@ -20,19 +28,22 @@ void stopForwardPancakeMotor();
 void stopBackwardPancakeMotor();
 
 void claw_setup() {
+  int timer = 0;
+
   clawservo.attach(CLAW_SERVO);  // attaches the claw servo on PWM pin to the servo object
-  armservo.attach(ARM_SERVO);  // attaches the arm servo on PWM pin to the servo object
-  pinMode(CLAW_END, INPUT_PULLUP);
-  pinMode(CLAW_START, INPUT_PULLUP);
+  // Arm servos have been doubled now //armservo.attach(ARM_SERVO);  // attaches the arm servo on PWM pin to the servo object
+  pinMode(ARM_LIMIT_END, INPUT_PULLUP);
+  pinMode(ARM_LIMIT_START, INPUT_PULLUP);
   pinMode(PANCAKE_BACK, OUTPUT);
   pinMode(PANCAKE_FOR, OUTPUT);
-  attachInterrupt(digitalPinToInterrupt(CLAW_END), stopForwardPancakeMotor, RISING);
-  attachInterrupt(digitalPinToInterrupt(CLAW_START), stopBackwardPancakeMotor, RISING);
-  // claw_servo_pos(OPEN);
+  attachInterrupt(digitalPinToInterrupt(ARM_LIMIT_END), stopForwardPancakeMotor, FALLING);
+  attachInterrupt(digitalPinToInterrupt(ARM_LIMIT_START), stopBackwardPancakeMotor, FALLING);
+  claw_servo_pos(OPEN);
   
-  // while(digitalRead(CLAW_START)){
-  //   claw_backward();
-  // }  
+  timer = millis();
+  while(digitalRead(ARM_LIMIT_START) && millis()-timer < 1500){
+    claw_backward();
+  }  
 
 }
 
@@ -86,10 +97,13 @@ void claw_servo_pos(int position){
     Loop for picking up treasures
 **/
 void claw_loop(){
+  int timer;
   //initally opens claw, assume start position is at CLAW_START
   claw_servo_pos(OPEN);
-  while(digitalRead(CLAW_END)){
-    claw_forward();
+
+  timer = millis();
+ while(digitalRead(ARM_LIMIT_END) && millis()-timer < 1500){
+   claw_forward();
   }
 
   // Sets initial angle as 40, to allow for sweep
@@ -117,10 +131,18 @@ void claw_loop(){
         delay(200);
     }
   }
+
+  timer = millis();
+  while(digitalRead(ARM_LIMIT_START)  && millis()-timer < 1500){
+    claw_backward();
+  }
+  claw_servo_pos(OPEN);
+  delay(1000);
 }
 
 void test_claw_loop(){
   //initally opens claw, assume start position is at CLAW_START
+
   claw_servo_pos(OPEN);
 
   if (analogRead(CLAW_REF) < CLAW_REF_THRES){
@@ -136,7 +158,7 @@ void test_claw_loop(){
 
 void claw_forward(){
   //If we aren't at the end already, then go forwards
-  if (digitalRead(CLAW_END)){
+  if (digitalRead(ARM_LIMIT_END)){
     digitalWrite(PANCAKE_BACK, LOW);
     digitalWrite(PANCAKE_FOR, HIGH);
     Serial.print("Going Forward");
@@ -146,7 +168,7 @@ void claw_forward(){
 
 void claw_backward(){
 //If we aren't currently at the start, then go backwards
-if (digitalRead(CLAW_START)){
+if (digitalRead(ARM_LIMIT_START)){
   digitalWrite(PANCAKE_FOR, LOW);
   digitalWrite(PANCAKE_BACK, HIGH);
   Serial.print("Going Backwards");
@@ -181,10 +203,10 @@ void arm_servo_pos(int position){
 }
 
 void claw_limitswitch(){
-  if(!digitalRead(CLAW_END)){
+  if(!digitalRead(ARM_LIMIT_END)){
     Serial.print("At End");
     Serial.println();
-  } else if(!digitalRead(CLAW_START)){
+  } else if(!digitalRead(ARM_LIMIT_START)){
     Serial.print("At Start");
     Serial.println();    
   } else{

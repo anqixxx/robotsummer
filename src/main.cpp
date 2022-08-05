@@ -5,6 +5,7 @@
 #include <SPI.h>
 #include <RF24.h>
 #include <Adafruit_SSD1306.h>
+#include <AccelStepper.h>
 
 #include "hardware_def.h"
 #include "tape_follow.h"
@@ -15,6 +16,10 @@
 #include "treasure.h"
 #include "serial_coms.h"
 #include "DuePWM.h"
+#include "Encoders.h"
+#include "Bridge.h"
+#include "Stepper.h"
+
 
 #include "PID_v1.h"
 
@@ -26,7 +31,6 @@ const byte address[6] = "00001";
 unsigned long lastReceiveTime = 0;
 unsigned long currentTime = 0;
 
-// Max size of this struct is 32 bytes - NRF24L01 buffer limit
 struct Data_Package
 {
   byte j1PotX;
@@ -47,6 +51,7 @@ struct Data_Package
 
 Data_Package data;
 
+
 /*
 IR PID Controller and variables
 */
@@ -58,16 +63,18 @@ PID myPID(&pidInput, &pidOutput, &pidSetpoint, 2, 0, 0, DIRECT);
 // OLED handler
 Adafruit_SSD1306 display_handler(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-/*
-Tape Follow Calibration
-*/
-int pot1;
-int pot2;
+// Bridge mechanism
+Bridge myBridge(BRIDGE_PIN);
 
 // RC Functions
 void rcloop();
 void setupRadio();
 void resetRadioData();
+
+// Stepper motor
+void setupStepper();
+void resetStepper(); // ISR for limit switch
+void calibrateStepper();
 
 // Robot Mode Selection
 void selectRobotMode();
@@ -91,26 +98,37 @@ void UltrasonicTesting();
 /*
 Robot mode - Select which stage of operation the robot is in
 */
+<<<<<<< HEAD
 int MODE = 2; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
 
 void setup()
 {
   MODE = 2; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+=======
+int MODE = 5; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+
+void setup()
+{
+>>>>>>> 64261dc6761b9ba74a26c05c62a9193353392c4b
   setupSerialPort();
-  setupRadio();                                                 // Open the RC radio communications
-  setupIRArray();                                          // Setup the logic pins for the IR Array
-  ultra_setup();                                              // Sets up sonars
-  claw_setup();                                              //
+  setupRadio();                                               // Open the RC radio communications
+  setupIRArray();                                             // Setup the logic pins for the IR Array
+  pinMode(PANCAKE_FOR, OUTPUT);
+  pinMode(PANCAKE_BACK, OUTPUT);
+  ultra_setup(); 
+                                               // Sets up sonars
+  //claw_setup();                                               //
   myPID.SetOutputLimits(-PID_OUTPUT_LIMIT, PID_OUTPUT_LIMIT); // Set the limits for the PID output values
   myPID.SetSampleTime(20);                                    // Set PID sample rate (value in ms)
-  pwm_setup();                                                // Adjust pwm to correct frequency for the drive motors
+  setupPWM();                                                // Adjust pwm to correct frequency for the drive motors
+  myBridge.setup();
+  setupStepper();
+  setupEncoders();
 
   display_handler.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Turn on OLED
   display_handler.display();                         // Display logo
-
-  
-  delay(2000);                                        // Allow logo to flash before
-  dispMode();                                        // Display the operation mode of robot on OLED
+  delay(2000); // Allow logo to flash before
+  dispMode();  // Display the operation mode of robot on OLED
 }
 
 void loop()
@@ -139,7 +157,7 @@ void selectRobotMode()
   case 0:
     // Starting mode, line follow until reaching the state of 4 reflectance sensors turned off
     // if all four are turned off or some other trigger
-    if (analogRead(TAPE_FAR_L)> 300 && analogRead(TAPE_FAR_R) > 300)
+    if (analogRead(TAPE_FAR_L) > 300 && analogRead(TAPE_FAR_R) > 300)
     {
 
       // Increment mode to reach next one
@@ -162,6 +180,7 @@ void selectRobotMode()
     moveToTreasure1();
     break;
   case 2:
+<<<<<<< HEAD
 //120 slightly open
 claw_servo_pos(180);
 Serial.print("Open");
@@ -170,10 +189,45 @@ claw_servo_pos(120);
 Serial.print("Close");
 delay(6000);
   break;
-  case 3:
-  break;
-  case 4:
+=======
+  // Make a sweep for the treasure
+    for (int angle = 40; angle < 140; angle++)
+    {
+      arm_servo_pos(angle);
+      delay(100);
+    }
+    arm_servo_pos(0);
+    delay(300);
+    MODE++;
+    dispMode();
 
+    break;
+>>>>>>> 64261dc6761b9ba74a26c05c62a9193353392c4b
+  case 3:
+ claw_servo_pos(120);
+ delay(7000);
+  claw_servo_pos(20);
+   delay(6000);
+
+      break;
+  case 4:
+  // Test case for transition off tape to beacon
+  // IDEA: unlike chicken wire, use the alignment of an unfiltered beacon signal to trigger transition through the
+    if (analogRead(TAPE_L) > 300 && analogRead(TAPE_R) > 300 &&
+        analogRead(TAPE_FAR_L) > 300 && analogRead(TAPE_FAR_R) > 300 &&
+        getUnfilteredIRArrayValue(4) > 10) // <--- Test this out to see which one indicates transition off of tape and into IR
+    {
+
+      // Increment mode to reach next one
+      MODE = MODE + 2;
+      // Update display with new mode
+      dispMode();
+    }
+    else
+    {
+      // Follow line
+      lineFollow();
+    }
     break;
   case 5:
 
@@ -192,6 +246,9 @@ delay(6000);
   case 9:
     SERIAL_OUT.println("End of automation sequence");
     break;
+      case 10:
+
+    break;
 
   case -1:
     SERIAL_OUT.println("Error");
@@ -199,27 +256,35 @@ delay(6000);
   }
 }
 
-// Increment the MODE variable to enter into the next mode and update the OLED
-void dispMode()
-{
-  display_handler.clearDisplay();
-  display_handler.setTextSize(2);
-  display_handler.setTextColor(SSD1306_WHITE);
-  display_handler.setCursor(0, 0);
-  display_handler.println("MODE:");
-  display_handler.setTextSize(5);
-  display_handler.println(MODE);
-  display_handler.display();
-}
-
 // Manual control of robot, allows drive control and MODE select
 void manualMode()
 {
   // Normalize drive values to -255 to 255 range
-  int leftMotor = (data.j1PotY - 128) * 1.9;
-  int rightMotor = (data.j2PotY - 128) * 1.9;
+  int leftMotor = (data.j1PotY +3 - 128) * 1.9;
+  int rightMotor = (data.j2PotY + 1 - 128) * 1.9;
+
+  if (leftMotor < 10 && leftMotor > -10){
+    leftMotor = 0;
+  }
+    if (rightMotor < 10 && rightMotor > -10){
+    rightMotor = 0;
+  }
+
   drive(leftMotor, rightMotor);
-  outputCSV(leftMotor, rightMotor, data.tSwitch2, 0, MODE);
+  outputCSV(leftMotor, rightMotor, data.tSwitch2, data.pot2*15, MODE);
+
+  moveStepper(data.pot2*15);
+
+  if(data.j2PotX > 220){
+    digitalWrite(PANCAKE_FOR, HIGH);
+    digitalWrite(PANCAKE_BACK,LOW);
+  } else if (data.j2PotX < 20){
+        digitalWrite(PANCAKE_FOR, LOW);
+    digitalWrite(PANCAKE_BACK,HIGH);
+  } else {
+        digitalWrite(PANCAKE_FOR, LOW);
+    digitalWrite(PANCAKE_BACK,LOW);
+  }
 
   // Use button 1 to increment MODE to start robot in desired state
   // When automatic drive is toggled
@@ -239,18 +304,39 @@ void manualMode()
     setupRadio();
     dispMode();
   }
+
+  // if (data.button3 == 0)
+  // {
+  //   while (digitalRead(CLAW_START))
+  //   {
+  //     claw_backward();
+  //   }
+  //   resetRadioData();
+  //   delay(100);
+  //   setupRadio();
+  // }
+  // else if (data.button4 == 0)
+  // {
+  //   while (digitalRead(CLAW_END))
+  //   {
+  //     claw_forward();
+  //   }
+  //   resetRadioData();
+  //   delay(100);
+  //   setupRadio();
+  // }
 }
 
 // Move from main course to treasure 1, can we hardcode this?  seems straightforward
 void moveToTreasure1()
 {
   SERIAL_OUT.println("Moving to treasure 1");
-  drive(-120,-120);
-  delay(900);
-  drive(0,0);
-
-  // Move to next mode after (grab treasure)
+  drive(-120, -120);
+  delay(1100);
+  drive(0, 0);
   MODE++;
+  dispMode();
+  // Move to next mode after (grab treasure)
 }
 
 // capture the IR beacon and move to next mode
@@ -292,42 +378,39 @@ void moveToTreasure4()
 }
 
 // Follows a set heading (probably stable in the -3 to 3 range) using PID control.
-// The left potentiometer tunes P value
-// The right potentiometer tunes I value
 
 void followBeacon(int heading)
 {
+  int averageSpeed = 100;
   pidSetpoint = heading;                                                                     // 0 is the heading towards the beacon
   pidInput = getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS); // Use the heading offset from beacon as the input
-  pot1 = data.pot1 / 2;
-  pot2 = data.pot2 / 2;
-  SERIAL_OUT.println(pot1);
-  SERIAL_OUT.print(pot2);
 
 
-  myPID.SetTunings(pot1, pot2, 0); // Set the P and I using the two potentiometers for tuning
+  myPID.SetTunings(PID_P_TUNING, PID_I_TUNING, 0); // Set the P and I using the two potentiometers for tuning
   myPID.Compute();                 // This will update the pidOutput variable that is linked to myPID
 
-  outputCSV(pot1, pot2, pidInput, (int)pidSetpoint, (int)pidOutput); // Debugging information
-
-  drive(MEDIUM - pidOutput, MEDIUM + pidOutput); // Use the PID output as a wheel speed differential
+  // outputCSV(pot1, pot2, pidInput, (int)pidSetpoint, (int)pidOutput); // Debugging information
+  drive(averageSpeed- pidOutput, averageSpeed + pidOutput); // Use the PID output as a wheel speed differential
 }
 
 // DEBUGGING and TESTING MODE for IR Array and Heading indicators
 void IRReadingMode()
 {
-
   int IRArrayValues[IR_ARRAY_SIZE];
 
   // Direction from robot to beacon -7 to 7
-  int heading = 0;
-  getIRArrayValues(IRArrayValues, TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS);
-  heading = convertToHeading(IRArrayValues);
+  // int heading = 0;
+  // getIRArrayValues(IRArrayValues, TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS);
+  // heading = convertToHeading(IRArrayValues);
+
+  for(int i = 0; i < IR_ARRAY_SIZE; i++){
+   IRArrayValues[i] =  getUnfilteredIRArrayValue(i);
+  }
 
   char telemtery[60];
-  sprintf(telemtery, "%d, %d, %d, %d, %d, %d, %d, %d, %d",
+  sprintf(telemtery, "%d, %d, %d, %d, %d, %d, %d, %d",
           IRArrayValues[0], IRArrayValues[1], IRArrayValues[2], IRArrayValues[3],
-          IRArrayValues[4], IRArrayValues[5], IRArrayValues[6], IRArrayValues[7], heading);
+          IRArrayValues[4], IRArrayValues[5], IRArrayValues[6], IRArrayValues[7]);
   SERIAL_OUT.println(telemtery);
 }
 
@@ -335,6 +418,27 @@ void UltrasonicTesting()
 {
   ultra_loop();
 }
+
+
+
+
+/* 
+* Display OLED Functions
+*/
+
+// Increment the MODE variable to enter into the next mode and update the OLED
+void dispMode()
+{
+  display_handler.clearDisplay();
+  display_handler.setTextSize(2);
+  display_handler.setTextColor(SSD1306_WHITE);
+  display_handler.setCursor(0, 0);
+  display_handler.println("MODE:");
+  display_handler.setTextSize(5);
+  display_handler.println(MODE);
+  display_handler.display();
+}
+
 
 /*
 Radio Functions
