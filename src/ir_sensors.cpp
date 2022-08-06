@@ -4,6 +4,24 @@
 // Correction factor to account for different sensitivities in the phototransistor responses
 double sensitivityCorrection[IR_ARRAY_SIZE] = {1.04, 1.06, 1.05, 1, 0.87, 1.14, 1, 1.02};
 
+
+int getQuickSignal(int led){
+int s1 = 0;
+int s2 = 0;
+int s3 = 0;
+
+  // Set the MUX to enabled with the ENable pin to low
+  digitalWrite(IR_EN, 0);
+
+   setSelectors(&s1, &s2, &s3, led);
+    digitalWrite(IR_S1, s1);
+    digitalWrite(IR_S2, s2);
+    digitalWrite(IR_S3, s3);
+   int signal = takeSquareSignalSample(IR_BEACON, TEN_KHZ, 100, SAMPLE_PERIOD, STANDARD_OFFSETS);
+   return signal;
+
+}
+
 // Setup the logic pins for the IR Array
 void setupIRArray()
 {

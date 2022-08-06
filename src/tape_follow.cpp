@@ -52,3 +52,7 @@ void lineFollow()
         }
     }
 }
+
+bool offTape(){
+    return ((analogRead(TAPE_L) < REF_THRES) &&  (analogRead(TAPE_R) < REF_THRES));
+}

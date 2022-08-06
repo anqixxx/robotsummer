@@ -6,30 +6,26 @@
 ClawClass::ClawClass(byte pinServo)
 {
     servo.attach(pinServo);
-    servo.write(180);
+    servo.write(CLAW_OPEN);
 }
 
 void ClawClass::reposition(int pos){
-    if (pos < CLAW_MIN){
-        pos = CLAW_MIN;
+    if (pos < CLAW_CLOSE){
+        pos = CLAW_CLOSE;
     }
-    if (pos > CLAW_MAX){
-        pos = CLAW_MAX;
+    if (pos > CLAW_OPEN){
+        pos = CLAW_OPEN;
     }
     servo.write(pos);
 }
 
 int ClawClass::getReflectance(){
     reflectance = analogRead(CLAW_REF);
-    Serial.println("Reflectance: ");
-    Serial.println(reflectance);
     return reflectance;
 }
 
 int ClawClass::getHall(){
     hall = analogRead(CLAW_MAG);
-    Serial.println("Magnetic: ");
-    Serial.println(hall);
     return hall;
 }
 

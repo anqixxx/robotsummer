@@ -6,6 +6,9 @@
 // Initialize the selection pins to digital write for the MUX
 void setupIRArray();
 
+// Get a quick IR reading
+int getQuickSignal(int led);
+
 // Returns the heading to the beacon, heading is a value from -7 to 7 with 
 // values -8 and 8 reserved for no signal or too many signals
 // Negative is to the left, positive is to the right

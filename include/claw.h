@@ -7,6 +7,13 @@
 
 //Enter in function definitions for claw movement, with the code located in claw.cpp
 
+
+int sweep(int dir);
+
+void retrieveTreasure(int treasure);
+
+void treasureSequence(int treasure);
+
 void claw_loop();
 
 void test_claw_loop();

@@ -7,7 +7,7 @@
 #include "ClawClass.h"
 #include "Stepper.h"
 
-#define HORZ_WAIT_TIME 10000 // The time to wait before stopping a horizontal
+#define HORZ_WAIT_TIME 4000 // The time to wait before stopping a horizontal
                             // Motion that didn't trigger limit switch
 
 #define ARM_HEIGHT_HIGH 3500 

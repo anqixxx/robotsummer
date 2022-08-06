@@ -5,7 +5,7 @@
 
 // Serial 3 is the TX RX port #3 (connect to BT)
 // Serial is the USB programming port
-#define SERIAL_OUT Serial
+#define SERIAL_OUT Serial3
 #define SERIAL_RATE 9600
 
 // OLED Display
@@ -34,6 +34,8 @@
 // Turning directions
 #define RIGHT 1
 #define LEFT 0
+#define CW 0
+#define CCW 1
 
 // Stepper Motor Pins
 #define STEPPER_DIR 26  // GREEN WIRE
@@ -42,7 +44,8 @@
 #define STEPPER_LIMIT 37 
 
 #define STEPPER_LOW_POS 0
-#define STEPPER_HIGH_POS 1000 // Figure this one out with hardware testing
+#define STEPPER_HIGH_POS 3300 // Figure this one out with hardware testing
+#define STEPPER_TREASURE_POS 1650
 
 // Encoder Pins
 #define ENCODER_LEFT_A 49
@@ -88,13 +91,17 @@
 #define PANCAKE_FOR 12 // PWM 
 #define PANCAKE_BACK 11 // PWM 
 
+#define ARMSTART 40
+#define ARMEND 140
+
 
 // Claw Values
 #define CLAW_SERVO 34 // PMW Pin
 #define CLAW_REF A2
 #define CLAW_MAG A3
-#define CLAW_MAX 180  
-#define CLAW_MIN 120
+#define CLAW_OPEN 140 
+#define CLAW_CLOSE 50
+
 
 
 
