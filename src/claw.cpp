@@ -5,6 +5,8 @@
 #include "ClawClass.h"
 #include "Arm.h"
 #include "serial_coms.h"
+#include "treasure.h"
+
 
 #define CLAW_REF_THRES 140
 #define CLAW_DET_THRES 100
@@ -23,7 +25,37 @@ Arm robotArm(PANCAKE_FOR, PANCAKE_BACK,
 void stopForwardPancakeMotor();
 void stopBackwardPancakeMotor();
 
+// Assumes claw is at the corect range
+// Sees if it is detected on Right or Left
+void treasureDetected(int SIDE_FOUND, int treasure)
+{
+  int sweepDir;
 
+  if (SIDE_FOUND == RIGHT){
+    sweepDir = CCW;
+  } else{
+    sweepDir = CW;
+  }
+
+  moveStepper(STEPPER_TREASURE_POS);
+  robotArm.moveClawOut();
+
+  int res = sweep(sweepDir);
+  if (res == TREASURE_FOUND){
+
+    moveStepper(getCurrentStepperPos() - 200);
+    if (claw.getHall() > CLAW_MAG_THRES){
+      claw.reposition(CLAW_CLOSE);
+      robotArm.setAngle(90);
+      retrieveTreasure(treasure);
+    }
+  }
+
+  outputCSV(claw.getHall(), claw.getReflectance(), 0, 0, 0);
+  delay(1000);
+    claw.reposition(CLAW_OPEN);
+  delay(1000);
+}
 
 /**
     Function
