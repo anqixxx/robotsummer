@@ -103,8 +103,6 @@
 #define CLAW_CLOSE 50
 
 
-
-
 // Sonars
 #define RIGHT_TRIG_PIN 38 // Digital
 #define RIGHT_ECHO_PIN 40 // Digital
