@@ -10,9 +10,9 @@
 
 int sweep(int dir);
 
-void retrieveTreasure(int treasure);
+void retrieveTreasure();
 
-void treasureSequence(int treasure);
+void treasureSequence();
 
 void claw_loop();
 

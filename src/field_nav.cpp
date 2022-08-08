@@ -5,6 +5,7 @@
 #include "serial_coms.h"
 #include "tape_follow.h"
 #include "ir_sensors.h"
+#include "Encoders.h"
 
 
 
@@ -40,6 +41,22 @@ void searchForBeacon(bool dir){
 
     // The robot should be locked onto the beacon now and ready for following
 
+}
+
+
+// Left is positive angle
+void rotate(int angle){
+    int left = getEncoderPositionLeft();
+    int right = getEncoderPositionRight();
+    int target = getEncoderPositionRight() + (angle*25)/90;
+
+
+
+    while (getEncoderPositionRight() < target){
+        drive (-SLOW-10, SLOW+10);
+    }
+
+    drive(0,0);
 }
 
 

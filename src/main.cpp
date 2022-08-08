@@ -66,6 +66,9 @@ Adafruit_SSD1306 display_handler(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET)
 // Bridge mechanism
 Bridge myBridge(BRIDGE_PIN);
 
+
+int treasures = 0;  // Total number of treasures in storage
+
 // RC Functions
 void rcloop();
 void setupRadio();
@@ -132,6 +135,12 @@ void setup()
 
 void loop()
 {
+  while(1){
+    outputCSV(getEncoderPositionLeft(), getEncoderPositionRight(), 0 ,0,0);
+        resetEncoders();
+        rotate(90);
+        delay(2000);
+  }
 
   // Check RC input
   rcloop();
@@ -159,7 +168,7 @@ void selectRobotMode()
     // if all four are turned off or some other trigger
     if (analogRead(TAPE_FAR_L) > 300 && analogRead(TAPE_FAR_R) > 300)
     {
-
+      drive(0,0);
       // Increment mode to reach next one
       MODE++;
       // Update display with new mode
@@ -181,7 +190,7 @@ void selectRobotMode()
     break;
   case 2:
     // Make a sweep for the treasure
-    treasureSequence(1);
+    treasureSequence();
     MODE++;
     dispMode();
     break;
@@ -203,7 +212,7 @@ void selectRobotMode()
   case 5:
 
           // Check for a ping on the left IR beacon LED to determine when in position
-    if (getQuickSignal(2) > 12){
+    if (getQuickSignal(1) > 10 ){
       drive(0,0);
       MODE++;
       dispMode();
@@ -216,12 +225,13 @@ void selectRobotMode()
       lineFollow();
     }
     break;
-
+    
+    //Maneuver to treasure 2 from the arch
       case 6:
-        drive(-150,-100);
-        delay(300);
-        drive(-180,0);
-        delay(1000);
+        drive(-150,-70);
+        delay(350);
+        drive(-180, 0);
+        delay(800);
         drive(0,0);
         MODE++;
         dispMode();
@@ -232,30 +242,25 @@ void selectRobotMode()
 
       case 7:
        // Make a sweep for the treasure
-    treasureSequence(1);
+    treasureSequence();
     MODE++;
     dispMode();
 
         
     break;
   case 8:
-    // Test case for transition off tape to beacon
-    // IDEA: unlike chicken wire, use the alignment of an unfiltered beacon signal to trigger transition through the
-    if (analogRead(TAPE_L) > 300 && analogRead(TAPE_R) > 300 &&
-        analogRead(TAPE_FAR_L) > 300 && analogRead(TAPE_FAR_R) > 300 &&
-        getUnfilteredIRArrayValue(4) > 10) // <--- Test this out to see which one indicates transition off of tape and into IR
-    {
+  resetEncoders();
+  drive(100,-100);
+  delay(700);
+  // while(getEncoderPositionLeft() < 10){
 
-      // Increment mode to reach next one
-      MODE = MODE + 2;
-      // Update display with new mode
-      dispMode();
-    }
-    else
-    {
-      // Follow line
-      lineFollow();
-    }
+  // }
+
+  drive(120,100);
+  delay(350);
+  drive(0,0);
+  MODE++;
+  dispMode();
 
     break;
   case 9:
@@ -364,8 +369,8 @@ void manualMode()
 void moveToTreasure1()
 {
   SERIAL_OUT.println("Moving to treasure 1");
-  drive(-170, -60);
-  delay(1100);
+  drive(-170, -90);
+  delay(950);
   drive(0, 0);
   MODE++;
   dispMode();
@@ -374,8 +379,8 @@ void moveToTreasure1()
 
 void crossChickenwire()
 {
-  drive(200, 110);
-  delay(1200);
+  drive(140, 95);
+  delay(1300);
   drive(0, 0);
   while (offTape())
   {
@@ -442,9 +447,13 @@ void IRReadingMode()
   int IRArrayValues[IR_ARRAY_SIZE];
 
   // Direction from robot to beacon -7 to 7
-  int heading = 0;
-  getIRArrayValues(IRArrayValues, TEN_KHZ, 100, SAMPLE_PERIOD, STANDARD_OFFSETS);
+  //int heading = 0;
+  //getIRArrayValues(IRArrayValues, TEN_KHZ, 100, SAMPLE_PERIOD, STANDARD_OFFSETS);
   // heading = convertToHeading(IRArrayValues);
+
+  for (int i = 0; i < IR_ARRAY_SIZE; i++){
+    IRArrayValues[i]= getQuickSignal(i);
+  }
 
 
 

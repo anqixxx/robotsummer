@@ -44,8 +44,8 @@
 #define STEPPER_LIMIT 37 
 
 #define STEPPER_LOW_POS 0
-#define STEPPER_HIGH_POS 3300 // Figure this one out with hardware testing
-#define STEPPER_TREASURE_POS 1650
+#define STEPPER_HIGH_POS 3400 // Figure this one out with hardware testing
+#define STEPPER_TREASURE_POS 2030
 
 // Encoder Pins
 #define ENCODER_LEFT_A 49
@@ -96,7 +96,7 @@
 
 
 // Claw Values
-#define CLAW_SERVO 34 // PMW Pin
+#define CLAW_SERVO 4 // PMW Pin
 #define CLAW_REF A2
 #define CLAW_MAG A3
 #define CLAW_OPEN 140 

@@ -6,7 +6,7 @@
 #include "Arm.h"
 #include "serial_coms.h"
 
-#define CLAW_REF_THRES 140
+#define CLAW_REF_THRES 450
 #define CLAW_DET_THRES 100
 #define CLAW_MAG_THRES 400
 
@@ -19,6 +19,7 @@ ClawClass claw = ClawClass(CLAW_SERVO);
 Arm robotArm(PANCAKE_FOR, PANCAKE_BACK,
              ARM_LIMIT_START, ARM_LIMIT_END,
              ARM_SERVO_TOP, ARM_SERVO_BOTTOM);
+int treasure = 0;
 
 void stopForwardPancakeMotor();
 void stopBackwardPancakeMotor();
@@ -31,7 +32,7 @@ void stopBackwardPancakeMotor();
     Loop for picking up treasures
 **/
 
-void treasureSequence(int treasure)
+void treasureSequence()
 {
 
   moveStepper(STEPPER_TREASURE_POS);
@@ -42,25 +43,45 @@ void treasureSequence(int treasure)
     moveStepper(getCurrentStepperPos() - 200);
     if (claw.getHall() > CLAW_MAG_THRES){
     claw.reposition(CLAW_CLOSE);
-    retrieveTreasure(treasure);
+    retrieveTreasure();
+    treasure++;  // Treasure found increment counter by one
     }
   }
   outputCSV(claw.getHall(), claw.getReflectance(), 0, 0, 0);
-  delay(1000);
+
     claw.reposition(CLAW_OPEN);
-  delay(1000);
+
 
  }
 
- void retrieveTreasure(int treasure){
+ void retrieveTreasure(){
+    int angle = 0;
 
     claw.reposition(CLAW_CLOSE);
     moveStepper(STEPPER_HIGH_POS);
-    robotArm.moveClawIn();
+    switch (treasure)
+  {
+  case 0:
+    angle = 10;
+    break;
+  case 1:
+    // From the chicken wire backup to the first treasure
+   angle = 50;
+    break;
+  case 2:
+    angle = 110;
+    break;
+  case 3:
+    angle = 150;
+  }
+  robotArm.setAngle(angle);
+      robotArm.moveClawIn();
     moveStepper(2000);   // Fix this number to a constant value *************************** TODO
     claw.reposition(CLAW_OPEN);
  }
 
+
+      
 void claw_loop()
 {
   int angle;
@@ -76,13 +97,13 @@ void claw_loop()
   for (angle = ARMSTART; angle < ARMEND && claw.getReflectance() > CLAW_DET_THRES; angle++)
   {
     robotArm.setAngle(angle);
-    delay(25);
+    delay(20);
   }
 
   for (; angle > ARMSTART && claw.getReflectance() > CLAW_DET_THRES; angle--)
   {
     robotArm.setAngle(angle);
-    delay(25);
+    delay(20);
   }
 
   if (claw.getHall() < CLAW_MAG_THRES)
@@ -176,7 +197,7 @@ int sweep(int dir)
     robotArm.setAngle(pos);              // tell servo to go to position in variable 'pos'
     delay(25);                       // waits 15ms for the servo to reach the position
     outputCSV(claw.getReflectance(),0,0,0,0);
-    if (claw.getReflectance()< CLAW_MAG_THRES){
+    if (claw.getReflectance()< CLAW_REF_THRES){
       return TREASURE_FOUND;
     }
   }
@@ -184,7 +205,7 @@ int sweep(int dir)
    robotArm.setAngle(pos);              // tell servo to go to position in variable 'pos'
     delay(25);                       // waits 15ms for the servo to reach the position
         outputCSV(claw.getReflectance(),0,0,0,0);
-    if (claw.getReflectance()< CLAW_MAG_THRES){
+    if (claw.getReflectance()< CLAW_REF_THRES){
       return TREASURE_FOUND;
     }
   }
