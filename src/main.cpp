@@ -170,19 +170,19 @@ void selectRobotMode()
     // Starting mode, line follow until reaching the state of 4 reflectance sensors turned off
     // if all four are turned off or some other trigger
 
-    if ((millis() - timer) > 30)
+    if ((millis() - timer) > 50)
     {
       timer = millis();
       sonarReading = readSonar(RIGHT);
 
-      if (sonarReading < 40)
+      if (sonarReading < 32)
       {
         timer = millis();
-        while (millis()-timer < 30){
+        while (millis()-timer < 50){
           lineFollow();
         }
         sonarReading = readSonar(RIGHT);
-        if (sonarReading < 40){
+        if (sonarReading < 32){
            drive(0, 0);
         SERIAL_OUT.println(readSonar(RIGHT));
         // Increment mode to reach next one
@@ -386,10 +386,11 @@ void manualMode()
 // Move from main course to treasure 1, can we hardcode this?  seems straightforward
 void moveToTreasure1()
 {
+  int dist;
+  delay(30);
+  dist = readSonar(RIGHT);
   rotate(90);
-  drive(-FAST, -FAST);
-  delay(300);
-  drive(0, 0);
+ backupToTreasure(dist);
   MODE++;
   dispMode();
   // Move to next mode after (grab treasure)
