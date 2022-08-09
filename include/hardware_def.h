@@ -27,9 +27,9 @@
 
 // Drive Speeds
 #define FULL 255
-#define FAST  200 // Variables for speed, test to find the one best for us
-#define MEDIUM 100
-#define SLOW 80
+#define FAST  180 // Variables for speed, test to find the one best for us, used to be 200
+#define MEDIUM 100 
+#define SLOW 75 // used to be 80
 
 // Turning directions
 #define RIGHT 1
@@ -113,4 +113,4 @@
 #define BRIDGE_PIN 42     // Pin for the bridge servo
 #define BRIDGE_CLOSE 140 // servo setting for a closed latch
 
-#endif      `
+#endif      
