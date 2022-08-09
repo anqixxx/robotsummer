@@ -223,6 +223,10 @@ int sweep(int dir)
 {
   int pos;
 
+// Make sure to add angles for claw that is in the tough sector, i.e. power needed means the delay causes it to read
+// and move
+// Also for one way, set angle to be +/- 5 to account for the side where the ref sensor is
+
   for (pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
    robotArm.setAngle(pos);              // tell servo to go to position in variable 'pos'
     delay(25);                       // waits 15ms for the servo to reach the position

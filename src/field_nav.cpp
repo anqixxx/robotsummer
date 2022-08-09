@@ -7,6 +7,7 @@
 #include "ir_sensors.h"
 #include "Encoders.h"
 
+#define OFFSET 6
 
 
 // Executes a search for the IR beacon until one of the sensors gets a signal
@@ -43,8 +44,8 @@ void searchForBeacon(bool dir){
 
 }
 
-
 // Left is positive angle
+// Encoder Rotation
 void rotate(int angle){
     int left = getEncoderPositionLeft();
     int right = getEncoderPositionRight();
@@ -61,7 +62,7 @@ void rotate(int angle){
 
 void backupToTreasure(double dist){
     double conversionFactor = 4/3;
-    double offset = 6;
+    double offset = OFFSET;
     resetEncoders();
     int start = millis();
     dist = (dist - offset) * conversionFactor;
@@ -72,4 +73,55 @@ void backupToTreasure(double dist){
 
 }
 
+void forwardFromTreasure(double dist){
+    double conversionFactor = 4/3;
+    double offset = OFFSET;
+    resetEncoders();
+    int start = millis();
+    dist = (dist - offset) * conversionFactor;
+    while(getEncoderPositionLeft() < dist && millis()-start < 1500){
+    drive(MEDIUM,MEDIUM);
+    }
+    drive(0,0);    
+}
 
+void crossChickenwire()
+{
+  while (onChickenWire()){
+      drive(95, 140);
+  }
+  drive(0, 0);
+  while (offTape())
+  {
+    drive(120, -120);
+  }
+}
+
+bool onChickenWire(){
+    int accum = 0;
+
+    if ((analogRead(TAPE_FAR_L) <= REF_THRES)){
+        accum += 1;
+    }
+    if ((analogRead(TAPE_FAR_R) <= REF_THRES)){
+        accum += 1;
+    }
+    if ((analogRead(TAPE_L) <= REF_THRES)){
+        accum += 1;
+    }
+    if ((analogRead(TAPE_R) <= REF_THRES)){
+        accum += 1;
+    }
+
+
+    // Diff cases:
+    // Both outer are on, or one outer and both inner
+    if ( accum >= 2)
+    {
+        return(true);
+    } 
+    else
+    {
+        return(false);
+    }
+}

@@ -9,5 +9,9 @@
 void searchForBeacon(bool dir);
 void rotate(int angle);
 void backupToTreasure(double dist);
+void forwardFromTreasure(double dist);
+void crossChickenwire();
+bool onChickenWire();
+
 
 #endif

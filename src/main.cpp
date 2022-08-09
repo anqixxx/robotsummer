@@ -89,11 +89,12 @@ void dispMode();
 
 // Mode operations
 void manualMode();
-void moveToTreasure1();
+void moveToTreasure1(double dist);
 void crossChickenwire();
 void captureBeacon();
 void followBeacon(int);
 void moveToTreasure4();
+void moveToTreasure2();
 
 // Testing Functions (TO BE REMOVED EVENTUALLY!)
 void IRReadingMode();
@@ -166,8 +167,7 @@ void selectRobotMode()
     dispMode();
 
   case 0:
-    // Starting mode, line follow until reaching the state of 4 reflectance sensors turned off
-    // if all four are turned off or some other trigger
+    // Starting mode, line follow until first treasure is detected
 
     if ((millis() - timer) > 60)
     {
@@ -177,10 +177,13 @@ void selectRobotMode()
       if (sonarReading < 35)
       {
         timer = millis();
+
         while (millis()-timer < 60){
           lineFollow(.7);
         }
+
         sonarReading = readSonar(RIGHT);
+
         if (sonarReading < 35){
            drive(0, 0);
         SERIAL_OUT.println(readSonar(RIGHT));
@@ -197,36 +200,86 @@ void selectRobotMode()
       lineFollow();
     }
 
-                // Debug protocol
-      outputCSV(analogRead(TAPE_L), analogRead(TAPE_R), analogRead(TAPE_FAR_L), analogRead(TAPE_FAR_R), sonarReading);
+    // Debug protocol
+    outputCSV(analogRead(TAPE_L), analogRead(TAPE_R), analogRead(TAPE_FAR_L), analogRead(TAPE_FAR_R), sonarReading);
+    break;
 
-    break;
   case 1:
-    // From the chicken wire backup to the first treasure
-    moveToTreasure1();
-    break;
-  case 2:
-    // Make a sweep for the treasure
+    // From sonar signals, back up to treasure, pick up
+    double dist;
+    delay(30); // change to 60 later? Leave as is for now as this is working 
+    dist = readSonar(RIGHT);
+
+    moveToTreasure1(dist);
+    
     treasureSequence();
-    MODE++;
+
+    forwardFromTreasure(dist);
+
+    while(offTape()){
+      drive(+FAST, -FAST);
+    }    
+
+    lineFollow();
     dispMode();
-    break;
-  case 3:
+    MODE++;
+
+  case 2:
+    // Crosses Chicken Wire
+    timer = millis();
+
+    while ( !onChickenWire() && (millis() - timer) < 1500 ){
+      lineFollow();
+    }
     crossChickenwire();
+    lineFollow();
     MODE++;
     dispMode();
     break;
-  case 4:
-    if (offTape())
+
+  case 3:
+    // Detects treasure 2
+    if ((millis() - timer) > 60)
     {
-      drive(150, -150);
+      timer = millis();
+      sonarReading = readSonar(RIGHT);
+
+      if (sonarReading < 35)
+      {
+        timer = millis();
+
+        while (millis()-timer < 60){
+          lineFollow(.7);
+        }
+
+        sonarReading = readSonar(RIGHT);
+
+        if (sonarReading < 35){
+           drive(0, 0);
+        SERIAL_OUT.println(readSonar(RIGHT));
+        // Increment mode to reach next one
+        MODE++;
+        // Update display with new mode
+        dispMode();
+        }       
+      }
     }
     else
     {
-      MODE++;
-      dispMode();
+      // Follow line
+      lineFollow();
     }
 
+    // Debug protocol
+    outputCSV(analogRead(TAPE_L), analogRead(TAPE_R), analogRead(TAPE_FAR_L), analogRead(TAPE_FAR_R), sonarReading);
+
+  case 4:
+    moveToTreasure2();
+    treasureSequence();
+
+    // Then rotate until we ping the IR at the desired frequency
+    MODE++;
+    dispMode();
     break;
   case 5:
 
@@ -246,15 +299,17 @@ void selectRobotMode()
     }
     break;
 
-    // Maneuver to treasure 2 from the arch
   case 6:
-    drive(-150, -70);
-    delay(350);
-    drive(-180, 0);
-    delay(800);
-    drive(0, 0);
-    MODE++;
-    dispMode();
+  // Maneuver to treasure 2 from the arch
+    // drive(-150, -70);
+    // delay(350);
+    // drive(-180, 0);
+    // delay(800);
+    // drive(0, 0);
+    // MODE++;
+    // dispMode();
+
+    //USE SONARS, 90 DEGREE ROTATION
 
     break;
 
@@ -383,27 +438,14 @@ void manualMode()
 }
 
 // Move from main course to treasure 1, can we hardcode this?  seems straightforward
-void moveToTreasure1()
+void moveToTreasure1(double dist)
 {
-  double dist;
-  delay(30);
-  dist = readSonar(RIGHT);
   rotate(90);
   backupToTreasure(dist);
-  MODE++;
-  dispMode();
-  // Move to next mode after (grab treasure)
 }
 
-void crossChickenwire()
-{
-  drive(140, 95);
-  delay(1300);
-  drive(0, 0);
-  while (offTape())
-  {
-    drive(120, -120);
-  }
+void moveToTreasure2(){
+  rotate(90);
 }
 
 // capture the IR beacon and move to next mode
