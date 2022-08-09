@@ -48,7 +48,7 @@ void treasureDetected(int SIDE_FOUND, int treasure)
     if (claw.getHall() > CLAW_MAG_THRES){
       claw.reposition(CLAW_CLOSE);
       robotArm.setAngle(90);
-      retrieveTreasure(treasure);
+      retrieveTreasure();
     }
   }
 

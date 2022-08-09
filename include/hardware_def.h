@@ -104,13 +104,13 @@
 
 
 // Sonars
-#define RIGHT_TRIG_PIN 38 // Digital
-#define RIGHT_ECHO_PIN 40 // Digital
-#define LEFT_TRIG_PIN 34 // Digital
-#define LEFT_ECHO_PIN 36 // Digital
+#define RIGHT_TRIG_PIN 52 // Digital
+#define RIGHT_ECHO_PIN 50 // Digital
+#define LEFT_TRIG_PIN 36 // Digital
+#define LEFT_ECHO_PIN 34 // Digital
 
 //Bridge Deployment
 #define BRIDGE_PIN 42     // Pin for the bridge servo
 #define BRIDGE_CLOSE 140 // servo setting for a closed latch
 
-#endif
+#endif      `

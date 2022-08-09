@@ -21,6 +21,7 @@
 #include "Stepper.h"
 #include "Arm.h"
 #include "ClawClass.h"
+#include "sonar.h"
 
 #include "PID_v1.h"
 
@@ -66,8 +67,8 @@ Adafruit_SSD1306 display_handler(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET)
 // Bridge mechanism
 Bridge myBridge(BRIDGE_PIN);
 
-
-int treasures = 0;  // Total number of treasures in storage
+int treasures = 0; // Total number of treasures in storage
+int timer = 0;
 
 // RC Functions
 void rcloop();
@@ -105,7 +106,7 @@ void UltrasonicTesting();
 /*
 Robot mode - Select which stage of operation the robot is in
 */
-int MODE = 0; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+int MODE = -1; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
 
 void setup()
 {
@@ -114,6 +115,7 @@ void setup()
   setupIRArray(); // Setup the logic pins for the IR Array
   pinMode(PANCAKE_FOR, OUTPUT);
   pinMode(PANCAKE_BACK, OUTPUT);
+  setupSonar();
 
   ultra_setup();
   // Sets up sonars
@@ -135,12 +137,7 @@ void setup()
 
 void loop()
 {
-  while(1){
-    outputCSV(getEncoderPositionLeft(), getEncoderPositionRight(), 0 ,0,0);
-        resetEncoders();
-        rotate(90);
-        delay(2000);
-  }
+
 
   // Check RC input
   rcloop();
@@ -160,29 +157,50 @@ void loop()
 // select the set of functions matchingb the current operation mode
 void selectRobotMode()
 {
+      int sonarReading = 0;
 
   switch (MODE)
   {
+  case -1:
+    timer = millis();
+    MODE++;
+    dispMode();
+
   case 0:
     // Starting mode, line follow until reaching the state of 4 reflectance sensors turned off
     // if all four are turned off or some other trigger
-    if (analogRead(TAPE_FAR_L) > 300 && analogRead(TAPE_FAR_R) > 300)
+
+    if ((millis() - timer) > 30)
     {
-      drive(0,0);
-      // Increment mode to reach next one
-      MODE++;
-      // Update display with new mode
-      dispMode();
+      timer = millis();
+      sonarReading = readSonar(RIGHT);
+
+      if (sonarReading < 40)
+      {
+        timer = millis();
+        while (millis()-timer < 30){
+          lineFollow();
+        }
+        sonarReading = readSonar(RIGHT);
+        if (sonarReading < 40){
+           drive(0, 0);
+        SERIAL_OUT.println(readSonar(RIGHT));
+        // Increment mode to reach next one
+        MODE++;
+        // Update display with new mode
+        dispMode();
+        }       
+      }
     }
     else
     {
-
-      // Debug protocol
-      outputCSV(analogRead(TAPE_L), analogRead(TAPE_R), data.pot1, data.pot2, 0);
-
       // Follow line
       lineFollow();
     }
+
+                // Debug protocol
+      outputCSV(analogRead(TAPE_L), analogRead(TAPE_R), analogRead(TAPE_FAR_L), analogRead(TAPE_FAR_R), sonarReading);
+
     break;
   case 1:
     // From the chicken wire backup to the first treasure
@@ -200,20 +218,23 @@ void selectRobotMode()
     dispMode();
     break;
   case 4:
-    if (offTape()){
-      drive(150,-150);
-    } else {
+    if (offTape())
+    {
+      drive(150, -150);
+    }
+    else
+    {
       MODE++;
       dispMode();
     }
 
-
     break;
   case 5:
 
-          // Check for a ping on the left IR beacon LED to determine when in position
-    if (getQuickSignal(1) > 10 ){
-      drive(0,0);
+    // Check for a ping on the left IR beacon LED to determine when in position
+    if (getQuickSignal(1) > 10)
+    {
+      drive(0, 0);
       MODE++;
       dispMode();
     }
@@ -225,42 +246,39 @@ void selectRobotMode()
       lineFollow();
     }
     break;
-    
-    //Maneuver to treasure 2 from the arch
-      case 6:
-        drive(-150,-70);
-        delay(350);
-        drive(-180, 0);
-        delay(800);
-        drive(0,0);
-        MODE++;
-        dispMode();
-        
+
+    // Maneuver to treasure 2 from the arch
+  case 6:
+    drive(-150, -70);
+    delay(350);
+    drive(-180, 0);
+    delay(800);
+    drive(0, 0);
+    MODE++;
+    dispMode();
+
     break;
 
-  
-
-      case 7:
-       // Make a sweep for the treasure
+  case 7:
+    // Make a sweep for the treasure
     treasureSequence();
     MODE++;
     dispMode();
 
-        
     break;
   case 8:
-  resetEncoders();
-  drive(100,-100);
-  delay(700);
-  // while(getEncoderPositionLeft() < 10){
+    resetEncoders();
+    drive(100, -100);
+    delay(700);
+    // while(getEncoderPositionLeft() < 10){
 
-  // }
+    // }
 
-  drive(120,100);
-  delay(350);
-  drive(0,0);
-  MODE++;
-  dispMode();
+    drive(120, 100);
+    delay(350);
+    drive(0, 0);
+    MODE++;
+    dispMode();
 
     break;
   case 9:
@@ -281,7 +299,7 @@ void selectRobotMode()
 
     break;
 
-  case -1:
+  case -99:
     SERIAL_OUT.println("Error");
     break;
   }
@@ -368,9 +386,9 @@ void manualMode()
 // Move from main course to treasure 1, can we hardcode this?  seems straightforward
 void moveToTreasure1()
 {
-  SERIAL_OUT.println("Moving to treasure 1");
-  drive(-170, -90);
-  delay(950);
+  rotate(90);
+  drive(-FAST, -FAST);
+  delay(300);
   drive(0, 0);
   MODE++;
   dispMode();
@@ -447,15 +465,14 @@ void IRReadingMode()
   int IRArrayValues[IR_ARRAY_SIZE];
 
   // Direction from robot to beacon -7 to 7
-  //int heading = 0;
-  //getIRArrayValues(IRArrayValues, TEN_KHZ, 100, SAMPLE_PERIOD, STANDARD_OFFSETS);
+  // int heading = 0;
+  // getIRArrayValues(IRArrayValues, TEN_KHZ, 100, SAMPLE_PERIOD, STANDARD_OFFSETS);
   // heading = convertToHeading(IRArrayValues);
 
-  for (int i = 0; i < IR_ARRAY_SIZE; i++){
-    IRArrayValues[i]= getQuickSignal(i);
+  for (int i = 0; i < IR_ARRAY_SIZE; i++)
+  {
+    IRArrayValues[i] = getQuickSignal(i);
   }
-
-
 
   char telemtery[60];
   sprintf(telemtery, "%d, %d, %d, %d, %d, %d, %d, %d",

@@ -27,7 +27,7 @@ void Arm::setup()
     pinMode(horzLeadForward, OUTPUT);
 
     moveClawOut();   // Move the claw out for stepper calibration
-    setAngle(ARMSTART);
+    setAngle(90);
 
 
 }
