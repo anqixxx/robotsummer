@@ -170,19 +170,19 @@ void selectRobotMode()
     // Starting mode, line follow until reaching the state of 4 reflectance sensors turned off
     // if all four are turned off or some other trigger
 
-    if ((millis() - timer) > 50)
+    if ((millis() - timer) > 60)
     {
       timer = millis();
       sonarReading = readSonar(RIGHT);
 
-      if (sonarReading < 32)
+      if (sonarReading < 28)
       {
         timer = millis();
-        while (millis()-timer < 50){
+        while (millis()-timer < 60){
           lineFollow();
         }
         sonarReading = readSonar(RIGHT);
-        if (sonarReading < 32){
+        if (sonarReading < 28){
            drive(0, 0);
         SERIAL_OUT.println(readSonar(RIGHT));
         // Increment mode to reach next one
