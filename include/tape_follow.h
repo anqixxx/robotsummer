@@ -8,6 +8,8 @@
 //Enter in function definitions for tape following, with the code located in tape_follow.cpp
 void lineFollow();
 
+void lineFollow(double modifier);
+
 bool offTape();
 
 #endif

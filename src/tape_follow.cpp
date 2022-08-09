@@ -53,6 +53,51 @@ void lineFollow()
     }
 }
 
+void lineFollow(double modifier)
+{
+    // Checks to see if the reflectance sensor is on tape or not
+    onTapeL = (analogRead(TAPE_L) > REF_THRES);
+    onTapeR = (analogRead(TAPE_R) > REF_THRES);
+
+    if (onTapeL || onTapeR)
+    {
+        // Either sensor on tape
+        if (onTapeL && onTapeR)
+        {
+            drive(modifier*FAST, modifier*FAST);
+        }
+        else if (!onTapeL && onTapeR)
+        {
+            drive(modifier*FAST, modifier*SLOW);
+        }
+        else if (onTapeL && !onTapeR)
+        {
+            drive(modifier*SLOW, modifier*FAST);
+        }
+
+        lastL = onTapeL;
+        lastR = onTapeR;
+    }
+    else
+    {
+        // Both sensors off tape, without updating last values until one sensor is on tape again
+        if (lastL)
+        {
+            // Pushes back against left drift, allows for course correction
+            drive(-modifier*SLOW, modifier*FAST);
+        }
+        else if (lastR)
+        {
+            // Pushes back against right drift, allows for course correction
+            drive(modifier*FAST, -modifier*SLOW);
+        }
+        else
+        {
+            drive(-modifier*SLOW, -modifier*SLOW); // no way to ever get to this line
+        }
+    }
+}
+
 bool offTape(){
     return ((analogRead(TAPE_L) < REF_THRES) &&  (analogRead(TAPE_R) < REF_THRES));
 }

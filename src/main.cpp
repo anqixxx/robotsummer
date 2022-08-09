@@ -138,7 +138,6 @@ void setup()
 void loop()
 {
 
-
   // Check RC input
   rcloop();
   // Right side toggle switch in up position is indicator for manual mode
@@ -157,7 +156,7 @@ void loop()
 // select the set of functions matchingb the current operation mode
 void selectRobotMode()
 {
-      int sonarReading = 0;
+  int sonarReading = 0;
 
   switch (MODE)
   {
@@ -170,19 +169,19 @@ void selectRobotMode()
     // Starting mode, line follow until reaching the state of 4 reflectance sensors turned off
     // if all four are turned off or some other trigger
 
-    if ((millis() - timer) > 50)
+    if ((millis() - timer) > 60)
     {
       timer = millis();
       sonarReading = readSonar(RIGHT);
 
-      if (sonarReading < 32)
+      if (sonarReading < 35)
       {
         timer = millis();
-        while (millis()-timer < 50){
-          lineFollow();
+        while (millis()-timer < 60){
+          lineFollow(.7);
         }
         sonarReading = readSonar(RIGHT);
-        if (sonarReading < 32){
+        if (sonarReading < 35){
            drive(0, 0);
         SERIAL_OUT.println(readSonar(RIGHT));
         // Increment mode to reach next one
@@ -386,11 +385,11 @@ void manualMode()
 // Move from main course to treasure 1, can we hardcode this?  seems straightforward
 void moveToTreasure1()
 {
-  int dist;
+  double dist;
   delay(30);
   dist = readSonar(RIGHT);
   rotate(90);
- backupToTreasure(dist);
+  backupToTreasure(dist);
   MODE++;
   dispMode();
   // Move to next mode after (grab treasure)
