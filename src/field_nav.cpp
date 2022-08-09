@@ -59,15 +59,14 @@ void rotate(int angle){
     drive(0,0);
 }
 
-void backupToTreasure(int dist){
+void backupToTreasure(double dist){
     double conversionFactor = 4/3;
-    int offset = 5;
+    double offset = 6;
     resetEncoders();
-    drive(-MEDIUM,-MEDIUM);
     int start = millis();
     dist = (dist - offset) * conversionFactor;
     while(getEncoderPositionLeft() < dist && millis()-start < 1500){
-
+    drive(-MEDIUM,-MEDIUM);
     }
     drive(0,0);    
 

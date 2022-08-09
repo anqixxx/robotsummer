@@ -66,12 +66,11 @@ void treasureDetected(int SIDE_FOUND, int treasure)
 
 void treasureSequence()
 {
-
   moveStepper(STEPPER_TREASURE_POS);
   robotArm.moveClawOut();
   int res = sweep(CCW);
-  if (res == TREASURE_FOUND){
 
+  if (res == TREASURE_FOUND){
     moveStepper(getCurrentStepperPos() - 200);
     if (claw.getHall() > CLAW_MAG_THRES){
     claw.reposition(CLAW_CLOSE);
@@ -222,17 +221,8 @@ void claw_limitswitch()
 
 int sweep(int dir)
 {
-
   int pos;
-    for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
-    // in steps of 1 degree
-    robotArm.setAngle(pos);              // tell servo to go to position in variable 'pos'
-    delay(25);                       // waits 15ms for the servo to reach the position
-    outputCSV(claw.getReflectance(),0,0,0,0);
-    if (claw.getReflectance()< CLAW_REF_THRES){
-      return TREASURE_FOUND;
-    }
-  }
+
   for (pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
    robotArm.setAngle(pos);              // tell servo to go to position in variable 'pos'
     delay(25);                       // waits 15ms for the servo to reach the position
@@ -241,5 +231,17 @@ int sweep(int dir)
       return TREASURE_FOUND;
     }
   }
+  
+  for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
+    // in steps of 1 degree
+    robotArm.setAngle(pos);              // tell servo to go to position in variable 'pos'
+    delay(25);                       // waits 15ms for the servo to reach the position
+    outputCSV(claw.getReflectance(),0,0,0,0);
+
+    if (claw.getReflectance()< CLAW_REF_THRES){
+      return TREASURE_FOUND;
+    }
+  }
+
   return TREASURE_NOT_FOUND;
 }
