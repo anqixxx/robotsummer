@@ -444,6 +444,9 @@ void moveToTreasure1(double dist)
 
 void moveToTreasure2(){
   rotate(90);
+  drive(-FAST,-FAST);
+  delay(200);
+  drive(0,0);
 }
 
 // capture the IR beacon and move to next mode
