@@ -45,7 +45,7 @@
 
 #define STEPPER_LOW_POS 0
 #define STEPPER_HIGH_POS 3400 // Figure this one out with hardware testing
-#define STEPPER_TREASURE_POS 2030
+#define STEPPER_TREASURE_POS 2000
 
 // Encoder Pins
 #define ENCODER_LEFT_A 49
