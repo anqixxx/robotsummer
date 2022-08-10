@@ -58,6 +58,7 @@
 #define TAPE_L A9
 #define TAPE_R A10
 #define TAPE_FAR_R A11
+#define REF_THRES 300
 
 // IR Beacon Readings
 #define TEN_KHZ 100  // period of 10khz in us

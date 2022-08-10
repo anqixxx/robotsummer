@@ -8,9 +8,8 @@
 #include "treasure.h"
 
 
-#define CLAW_REF_THRES 450
-#define CLAW_DET_THRES 100
-#define CLAW_MAG_THRES 400
+#define CLAW_REF_THRES 520
+#define CLAW_MAG_THRES 700
 
 #define TREASURE_FOUND 1
 #define TREASURE_NOT_FOUND 0
@@ -28,20 +27,13 @@ void stopBackwardPancakeMotor();
 
 // Assumes claw is at the corect range
 // Sees if it is detected on Right or Left
-void treasureDetected(int SIDE_FOUND, int treasure)
+void treasureDetected(int start, int end, int treasure)
 {
-  int sweepDir;
-
-  if (SIDE_FOUND == RIGHT){
-    sweepDir = CCW;
-  } else{
-    sweepDir = CW;
-  }
 
   moveStepper(STEPPER_TREASURE_POS);
   robotArm.moveClawOut();
 
-  int res = sweep(sweepDir);
+  int res = sweep(start, end);
   if (res == TREASURE_FOUND){
 
     moveStepper(getCurrentStepperPos() - 200);
@@ -64,21 +56,22 @@ void treasureDetected(int SIDE_FOUND, int treasure)
     Loop for picking up treasures
 **/
 
-void treasureSequence()
+void treasureSequence(int start, int end)
 {
   moveStepper(STEPPER_TREASURE_POS);
   robotArm.moveClawOut();
-  int res = sweep(CCW);
+  int res = sweep(start, end);
+  SERIAL_OUT.println("Hall, Ref, Results, 0 ,0" );
+  outputCSV(claw.getHall(), claw.getReflectance(), res, 0, 0);
 
   if (res == TREASURE_FOUND){
     moveStepper(getCurrentStepperPos() - 200);
     if (claw.getHall() > CLAW_MAG_THRES){
-    claw.reposition(CLAW_CLOSE);
-    retrieveTreasure();
-    treasure++;  // Treasure found increment counter by one
+      claw.reposition(CLAW_CLOSE);
+      retrieveTreasure();
+      treasure++;  // Treasure found increment counter by one
     }
   }
-  outputCSV(claw.getHall(), claw.getReflectance(), 0, 0, 0);
 
     claw.reposition(CLAW_OPEN);
 
@@ -110,75 +103,6 @@ void treasureSequence()
     moveStepper(2000);   // Fix this number to a constant value *************************** TODO
     claw.reposition(CLAW_OPEN);
  }
-
-
-      
-void claw_loop()
-{
-  int angle;
-  // initally opens claw, assume start position is at CLAW_START
-  claw.reposition(CLAW_OPEN);
-  robotArm.moveClawOut();
-
-  // Sets initial angle as 40, to allow for sweep
-  // Will exit loop if the threshold is not broached
-
-  robotArm.setAngle(ARMSTART);
-  delay(100);
-  for (angle = ARMSTART; angle < ARMEND && claw.getReflectance() > CLAW_DET_THRES; angle++)
-  {
-    robotArm.setAngle(angle);
-    delay(20);
-  }
-
-  for (; angle > ARMSTART && claw.getReflectance() > CLAW_DET_THRES; angle--)
-  {
-    robotArm.setAngle(angle);
-    delay(20);
-  }
-
-  if (claw.getHall() < CLAW_MAG_THRES)
-  {
-    // robotArm.moveClawIn();
-  }
-  else
-  {
-    // stepper motor move down
-
-    if (claw.getReflectance() < CLAW_REF_THRES)
-    {
-      if (claw.getHall() > CLAW_MAG_THRES)
-      {
-        claw.reposition(CLAW_CLOSE);
-      }
-
-      // robotArm.moveClawIn();
-      claw.reposition(CLAW_OPEN);
-    }
-  }
-}
-
-void test_claw_loop()
-{
-  // initally opens claw, assume start position is at CLAW_START
-  claw.reposition(CLAW_OPEN);
-
-  if (claw.getReflectance() < CLAW_DET_THRES)
-  {
-    if (claw.getHall() > CLAW_MAG_THRES)
-    {
-      claw.reposition(CLAW_CLOSE);
-      delay(6000);
-      // Add boolean to detect magnetic, automatically stop loop if so
-    }
-    else
-    {
-      Serial.println("Magnetic detected");
-    }
-  }
-  claw.reposition(CLAW_OPEN);
-  delay(1000);
-}
 
 void claw_test_value()
 {
@@ -218,34 +142,37 @@ void claw_limitswitch()
   }
 }
 
-
-int sweep(int dir)
-{
+int sweep(int start, int end){
   int pos;
-
 // Make sure to add angles for claw that is in the tough sector, i.e. power needed means the delay causes it to read
 // and move
 // Also for one way, set angle to be +/- 5 to account for the side where the ref sensor is
-
-  for (pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
+if (start > end){
+  for (pos = start; pos >= end; pos -= 1) { // goes from 180 degrees to 0 degrees
    robotArm.setAngle(pos);              // tell servo to go to position in variable 'pos'
-    delay(25);                       // waits 15ms for the servo to reach the position
-        outputCSV(claw.getReflectance(),0,0,0,0);
-    if (claw.getReflectance()< CLAW_REF_THRES){
-      return TREASURE_FOUND;
-    }
-  }
-  
-  for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
-    // in steps of 1 degree
-    robotArm.setAngle(pos);              // tell servo to go to position in variable 'pos'
-    delay(25);                       // waits 15ms for the servo to reach the position
+    delay(35);                       // waits 15ms for the servo to reach the position
     outputCSV(claw.getReflectance(),0,0,0,0);
 
     if (claw.getReflectance()< CLAW_REF_THRES){
+      robotArm.setAngle(pos-10); 
+      delay(100);
       return TREASURE_FOUND;
     }
   }
 
-  return TREASURE_NOT_FOUND;
+} else{
+    for (pos = start; pos <= end; pos += 1) { // goes from 0 degrees to 180 degrees
+    // in steps of 1 degree
+    robotArm.setAngle(pos);              // tell servo to go to position in variable 'pos'
+    delay(35);                       // waits 15ms for the servo to reach the position
+    outputCSV(claw.getReflectance(),0,0,0,0);
+    if (claw.getReflectance()< CLAW_REF_THRES){
+      return TREASURE_FOUND;
+    }
+  }
+}
+
+return TREASURE_NOT_FOUND;
+
+
 }

@@ -47,10 +47,7 @@ void searchForBeacon(bool dir){
 // Left is positive angle
 // Encoder Rotation
 void rotate(int angle){
-    int left = getEncoderPositionLeft();
-    int right = getEncoderPositionRight();
     int target = getEncoderPositionRight() + (angle*25)/90;
-
 
     int start = millis();
     while (getEncoderPositionRight() < target && millis()-start < 2000){
@@ -66,7 +63,7 @@ void backupToTreasure(double dist){
     resetEncoders();
     int start = millis();
     dist = (dist - offset) * conversionFactor;
-    while(getEncoderPositionLeft() < dist && millis()-start < 1500){
+    while(getEncoderPositionLeft() > -dist && millis()-start < 1500){
     drive(-MEDIUM,-MEDIUM);
     }
     drive(0,0);    
@@ -80,7 +77,7 @@ void forwardFromTreasure(double dist){
     int start = millis();
     dist = (dist - offset) * conversionFactor;
     while(getEncoderPositionLeft() < dist && millis()-start < 1500){
-    drive(MEDIUM,MEDIUM);
+        drive(MEDIUM,MEDIUM);
     }
     drive(0,0);    
 }
@@ -88,7 +85,7 @@ void forwardFromTreasure(double dist){
 void crossChickenwire()
 {
   while (onChickenWire()){
-      drive(95, 140);
+      drive(95, 125);
   }
   drive(0, 0);
   while (offTape())
@@ -116,7 +113,7 @@ bool onChickenWire(){
 
     // Diff cases:
     // Both outer are on, or one outer and both inner
-    if ( accum >= 2)
+    if ( accum > 2)
     {
         return(true);
     } 

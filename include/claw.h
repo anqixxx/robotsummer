@@ -8,21 +8,17 @@
 //Enter in function definitions for claw movement, with the code located in claw.cpp
 
 
-int sweep(int dir);
+int sweep(int start, int end);
 
 void retrieveTreasure();
 
-void treasureSequence();
+void treasureDetected(int start, int end, int treasure);
 
-void claw_loop();
-
-void test_claw_loop();
+void treasureSequence(int start, int end);
 
 void stopBackwardPancakeMotor();
 
 void stopForwardPancakeMotor();
-
-void claw_test_value();
 
 void arm_servo_pos(int position);
 

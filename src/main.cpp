@@ -207,12 +207,12 @@ void selectRobotMode()
   case 1:
     // From sonar signals, back up to treasure, pick up
     double dist;
-    delay(30); // change to 60 later? Leave as is for now as this is working 
+    delay(60); // change to 60 later? Leave as is for now as this is working 
     dist = readSonar(RIGHT);
 
     moveToTreasure1(dist);
     
-    treasureSequence();
+    treasureSequence(130, 10);
 
     forwardFromTreasure(dist);
 
@@ -275,12 +275,18 @@ void selectRobotMode()
 
   case 4:
     moveToTreasure2();
-    treasureSequence();
+    treasureSequence(110, 0);
 
     // Then rotate until we ping the IR at the desired frequency
-    MODE++;
-    dispMode();
-    break;
+    if (getQuickSignal(3) > 10 && getQuickSignal(4) > 10){
+      drive(0,0);
+      MODE++;
+      dispMode();
+      break;
+    } else{
+      drive(+MEDIUM, -MEDIUM);
+    }
+
   case 5:
 
     // Check for a ping on the left IR beacon LED to determine when in position
@@ -315,7 +321,7 @@ void selectRobotMode()
 
   case 7:
     // Make a sweep for the treasure
-    treasureSequence();
+    treasureSequence(110, 0);
     MODE++;
     dispMode();
 

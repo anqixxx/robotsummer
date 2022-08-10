@@ -25,13 +25,14 @@ pinMode(ENCODER_LEFT_A, INPUT);
 
 }
 
+// Right encoder and Left encoder have opposite logics, as apparent in code
 void EncoderLAISR(){
 
 noInterrupts(); //stop interrupts happening before we read pin values
   bool stateENCA = digitalRead(ENCODER_LEFT_A);
   bool stateENCB = digitalRead(ENCODER_LEFT_B);
   if(stateENCA && stateENCB && aFlagLeft) { //check that we have both pins at detent (HIGH) and that we are expecting detent on this pin's rising edge
-    encoderPosLeft --; //decrement the encoder's position count
+    encoderPosLeft ++; //decrement the encoder's position count
     bFlagLeft = 0; //reset flags for the next turn
     aFlagLeft = 0; //reset flags for the next turn
   }
@@ -44,7 +45,7 @@ noInterrupts(); //stop interrupts happening before we read pin values
   bool stateENCA = digitalRead(ENCODER_LEFT_A);
   bool stateENCB = digitalRead(ENCODER_LEFT_B);
   if(stateENCA && stateENCB && bFlagLeft) { //check that we have both pins at detent (HIGH) and that we are expecting detent on this pin's rising edge
-    encoderPosLeft ++; //decrement the encoder's position count
+    encoderPosLeft --; //decrement the encoder's position count
     bFlagLeft = 0; //reset flags for the next turn
     aFlagLeft = 0; //reset flags for the next turn
   }
