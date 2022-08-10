@@ -8,7 +8,7 @@
 #include "treasure.h"
 
 
-#define CLAW_REF_THRES 520
+#define CLAW_REF_THRES 440
 #define CLAW_MAG_THRES 700
 
 #define TREASURE_FOUND 1
@@ -154,8 +154,6 @@ if (start > end){
     outputCSV(claw.getReflectance(),0,0,0,0);
 
     if (claw.getReflectance()< CLAW_REF_THRES){
-      robotArm.setAngle(pos-10); 
-      delay(100);
       return TREASURE_FOUND;
     }
   }

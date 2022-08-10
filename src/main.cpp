@@ -69,6 +69,8 @@ Bridge myBridge(BRIDGE_PIN);
 
 int treasures = 0; // Total number of treasures in storage
 int timer = 0;
+int sonarTimeout = 0;
+
 
 // RC Functions
 void rcloop();
@@ -138,10 +140,15 @@ void setup()
 
 void loop()
 {
+  // while(1){
+  //   outputCSV(analogRead(TAPE_FAR_L), analogRead(TAPE_L), analogRead(TAPE_R), analogRead(TAPE_FAR_R), 0);
+  // }
+
 
   // Check RC input
   rcloop();
   // Right side toggle switch in up position is indicator for manual mode
+
   if (data.tSwitch2 == 0)
   {
     manualMode();
@@ -158,21 +165,30 @@ void loop()
 void selectRobotMode()
 {
   int sonarReading = 0;
-
   switch (MODE)
   {
   case -1:
     timer = millis();
     MODE++;
     dispMode();
+    sonarTimeout = millis();
+
 
   case 0:
     // Starting mode, line follow until first treasure is detected
-
+    while ((millis() - sonarTimeout) < 3500)
+    {
+      lineFollow();
+      
+    }
+    
     if ((millis() - timer) > 60)
     {
       timer = millis();
       sonarReading = readSonar(RIGHT);
+      SERIAL_OUT.print("RIGHT SIDE SONAR: ");
+      SERIAL_OUT.println(sonarReading);
+
 
       if (sonarReading < 35)
       {
@@ -185,7 +201,7 @@ void selectRobotMode()
         sonarReading = readSonar(RIGHT);
 
         if (sonarReading < 35){
-           drive(0, 0);
+        drive(0, 0);
         SERIAL_OUT.println(readSonar(RIGHT));
         // Increment mode to reach next one
         MODE++;
@@ -212,7 +228,7 @@ void selectRobotMode()
 
     moveToTreasure1(dist);
     
-    treasureSequence(130, 10);
+    treasureSequence(160, 10);
 
     forwardFromTreasure(dist);
 
@@ -225,67 +241,29 @@ void selectRobotMode()
     MODE++;
 
   case 2:
-    // Crosses Chicken Wire
-    timer = millis();
-
-    while ( !onChickenWire() && (millis() - timer) < 1500 ){
-      lineFollow();
-    }
-    crossChickenwire();
-    lineFollow();
+    if (onChickenWire()){
+      drive(0,0);      
     MODE++;
     dispMode();
+    }
+    else{lineFollow();}
+
     break;
 
   case 3:
-    // Detects treasure 2
-    if ((millis() - timer) > 60)
-    {
-      timer = millis();
-      sonarReading = readSonar(RIGHT);
+    // Crosses Chicken Wire
+    
+    crossChickenwire();
 
-      if (sonarReading < 35)
-      {
-        timer = millis();
-
-        while (millis()-timer < 60){
-          lineFollow(.7);
-        }
-
-        sonarReading = readSonar(RIGHT);
-
-        if (sonarReading < 35){
-           drive(0, 0);
-        SERIAL_OUT.println(readSonar(RIGHT));
-        // Increment mode to reach next one
-        MODE++;
-        // Update display with new mode
-        dispMode();
-        }       
-      }
-    }
-    else
-    {
-      // Follow line
-      lineFollow();
-    }
-
-    // Debug protocol
-    outputCSV(analogRead(TAPE_L), analogRead(TAPE_R), analogRead(TAPE_FAR_L), analogRead(TAPE_FAR_R), sonarReading);
-
+    MODE++;
+    dispMode();
+    break;
   case 4:
-    moveToTreasure2();
-    treasureSequence(110, 0);
+    // moveToTreasure2();
+    // treasureSequence(110, 0);
 
-    // Then rotate until we ping the IR at the desired frequency
-    if (getQuickSignal(3) > 10 && getQuickSignal(4) > 10){
-      drive(0,0);
-      MODE++;
-      dispMode();
-      break;
-    } else{
-      drive(+MEDIUM, -MEDIUM);
-    }
+    lineFollow();
+    break;
 
   case 5:
 
@@ -306,47 +284,19 @@ void selectRobotMode()
     break;
 
   case 6:
-  // Maneuver to treasure 2 from the arch
-    // drive(-150, -70);
-    // delay(350);
-    // drive(-180, 0);
-    // delay(800);
-    // drive(0, 0);
-    // MODE++;
-    // dispMode();
-
-    //USE SONARS, 90 DEGREE ROTATION
-
     break;
-
   case 7:
-    // Make a sweep for the treasure
-    treasureSequence(110, 0);
     MODE++;
     dispMode();
-
     break;
   case 8:
-    resetEncoders();
-    drive(100, -100);
-    delay(700);
-    // while(getEncoderPositionLeft() < 10){
-
-    // }
-
-    drive(120, 100);
-    delay(350);
-    drive(0, 0);
     MODE++;
     dispMode();
-
     break;
   case 9:
-    captureBeacon();
     MODE++;
     break;
   case 10:
-    moveToTreasure4();
     break;
   case 11:
     // outputCSV(getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS),getHeadingToBeacon(ONE_KHZ, ONE_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS),0,0,0);

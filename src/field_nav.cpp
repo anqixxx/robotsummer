@@ -58,6 +58,9 @@ void rotate(int angle){
 }
 
 void backupToTreasure(double dist){
+    if (dist > 28){
+        dist = 28;
+    }
     double conversionFactor = 4/3;
     double offset = OFFSET;
     resetEncoders();
@@ -71,6 +74,10 @@ void backupToTreasure(double dist){
 }
 
 void forwardFromTreasure(double dist){
+    if (dist > 28){
+        dist = 28;
+    }
+
     double conversionFactor = 4/3;
     double offset = OFFSET;
     resetEncoders();
@@ -85,28 +92,33 @@ void forwardFromTreasure(double dist){
 void crossChickenwire()
 {
   while (onChickenWire()){
-      drive(95, 125);
+      drive(125, 180);
   }
+
   drive(0, 0);
+  drive(250,250);
+  delay(400);
+  drive(0,0);
+
   while (offTape())
   {
-    drive(120, -120);
+    drive(0, 150);
   }
 }
 
 bool onChickenWire(){
     int accum = 0;
 
-    if ((analogRead(TAPE_FAR_L) <= REF_THRES)){
+    if ((analogRead(TAPE_FAR_L) > REF_THRES)){
         accum += 1;
     }
-    if ((analogRead(TAPE_FAR_R) <= REF_THRES)){
+    if ((analogRead(TAPE_FAR_R) > REF_THRES)){
         accum += 1;
     }
-    if ((analogRead(TAPE_L) <= REF_THRES)){
+    if ((analogRead(TAPE_L) >  REF_THRES)){
         accum += 1;
     }
-    if ((analogRead(TAPE_R) <= REF_THRES)){
+    if ((analogRead(TAPE_R) > REF_THRES)){
         accum += 1;
     }
 
