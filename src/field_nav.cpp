@@ -51,7 +51,7 @@ void rotate(int angle){
     int target = getEncoderPositionRight() + (angle*25)/90;
 
     int start = millis();
-    int speed = SLOW +50;
+    int speed = SLOW +65;
     if(angle > 0){
     while (getEncoderPositionRight() < target && millis()-start < 2000){
         
@@ -63,9 +63,6 @@ void rotate(int angle){
         drive (speed, -speed);
     }
     }
-
-
-
 
     drive(0,0);
 }

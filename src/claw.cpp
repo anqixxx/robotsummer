@@ -87,7 +87,7 @@ void treasureSequence(int start, int end)
     int angle = 0;
 
     claw.reposition(CLAW_CLOSE);
-    delay(500);
+    delay(600);
     moveStepper(STEPPER_HIGH_POS);
     switch (treasure)
   {
@@ -106,6 +106,7 @@ void treasureSequence(int start, int end)
   }
   robotArm.setAngle(angle);
   robotArm.moveClawIn();
+  delay(200);
   moveStepper(2000);   // Fix this number to a constant value *************************** TODO
   claw.reposition(CLAW_OPEN);
  }
@@ -183,4 +184,26 @@ if (start > end){
 return TREASURE_NOT_FOUND;
 
 
+}
+
+void armTestLoop(){
+  int pos = 0;
+  robotArm.setAngle(pos);              // tell servo to go to position in variable 'pos'
+  delay(100);    
+  
+  for (pos = 0; pos <= 180; pos += 1) { // goes from 180 degrees to 0 degrees
+   robotArm.setAngle(pos);              // tell servo to go to position in variable 'pos'
+    delay(25);                       // waits 15ms for the servo to reach the position
+  }
+
+  for (pos = 180; pos >= 0; pos -= 1) { // goes from 0 degrees to 180 degrees
+    // in steps of 1 degree
+    robotArm.setAngle(pos);              // tell servo to go to position in variable 'pos'
+    delay(25);                       // waits 15ms for the servo to reach the position
+  }
+}
+
+void armtestpos(int pos){
+  robotArm.setAngle(pos);              // tell servo to go to position in variable 'pos'
+  delay(100);   
 }

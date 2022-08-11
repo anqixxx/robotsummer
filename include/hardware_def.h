@@ -85,8 +85,8 @@
 
 // Robot Arm
 
-#define ARM_SERVO_TOP 2 // PMW Pin
-#define ARM_SERVO_BOTTOM 3 // PMW Pin
+#define ARM_SERVO_TOP 3 // PMW Pin
+#define ARM_SERVO_BOTTOM 2 // PMW Pin
 #define ARM_LIMIT_END 39 //Digital
 #define ARM_LIMIT_START 41 // Digital       
 #define PANCAKE_FOR 12 // PWM 

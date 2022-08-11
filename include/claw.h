@@ -7,6 +7,7 @@
 
 //Enter in function definitions for claw movement, with the code located in claw.cpp
 
+void armTestLoop();
 
 int sweep(int start, int end);
 
@@ -25,5 +26,7 @@ void arm_servo_pos(int position);
 void claw_test_value();
 
 void irOn();
+
+void armtestpos(int pos);
 
 #endif

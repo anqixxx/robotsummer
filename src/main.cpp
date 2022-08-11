@@ -243,65 +243,98 @@ void selectRobotMode()
     // From sonar signals, back up to treasure, pick up
     moveToTreasure2();
     
-    treasureSequence(10, 180);
+    treasureSequence(0, 180);
+    armtestpos(90);
 
     drive(0, 0);
-    MODE = 11;
+    // rotate(-100);
+    // drive(MEDIUM,MEDIUM);
+    // delay(500);
+    // rotate(15);
+    timer = millis();
+
+    MODE++;
+    dispMode();
     break;
 
   case 6:
-    // Use IR to determine when in line for the Arch
-    if (getQuickSignal(4) > 14 && getQuickSignal(5) > 14)
-    {
-      drive(0, 0);
-      MODE++;
-      dispMode();
-    }
-    else
-    {
-      // Debug protocol
-      outputCSV(analogRead(TAPE_L), analogRead(TAPE_R), data.pot1, data.pot2, 0);
-      // Rotate until signal is found
-      drive(-FAST,FAST);
-    }
+    // while ((getQuickSignal(4) < 10 )|| (millis() -timer ) < 3000){
+    //   followBeacon(0);
+    // }
+
+    // followBeacon(-0.5);
+
+    rotate(-100);
+    delay(500);
+    rotate(30);
+    delay(500);
+    drive(MEDIUM, MEDIUM);
+    delay(350);
+    drive(0,0);
+    rotate(5);
+    delay(500);
+    drive(MEDIUM, MEDIUM);
+    delay(150);
+    drive(0,0);
+    rotate(10);
+    delay(100);
+    drive(MEDIUM, MEDIUM);
+    delay(250);
+    drive(0,0);
+    rotate(10);
+    delay(100);
+    drive(MEDIUM, MEDIUM);
+    delay(250);
+    drive(0,0);
+    
+
+
+
+
+
+
+    MODE++;
+    dispMode();
     break;
   case 7:
   // Drives forward until we reach treasure 3 
+  drive(0,0);
   
-    if ((millis() - timer) > 60)
-    {
-      timer = millis();
-      int sonarReading = readSonar(LEFT);
-      SERIAL_OUT.print("LEFT SIDE SONAR: ");
-      SERIAL_OUT.println(sonarReading);
+    // if ((millis() - timer) > 60)
+    // {
+    //   timer = millis();
+    //   int sonarReading = readSonar(LEFT);
+    //   SERIAL_OUT.print("LEFT SIDE SONAR: ");
+    //   SERIAL_OUT.println(sonarReading);
 
 
-      if (sonarReading < 40)
-      {
-        timer = millis();
+    //   if (sonarReading < 40)
+    //   {
+    //     timer = millis();
 
-        while (millis()-timer < 60){
-          lineFollow(.7);
-        }
+    //     while (millis()-timer < 60){
+    //       lineFollow(.7);
+    //     }
 
-        sonarReading = readSonar(LEFT);
+    //     sonarReading = readSonar(LEFT);
 
-        if (sonarReading < 40){
-        drive(0, 0);
-        SERIAL_OUT.println(readSonar(LEFT));
-        // Increment mode to reach next one
-        MODE++;
-        // Update display with new mode
-        dispMode();
-        }       
-      }
-    }
-    else
-    {
-      //IR CODE
-    }
-    MODE++;
-    dispMode();
+    //     if (sonarReading < 40){
+    //     drive(0, 0);
+    //     SERIAL_OUT.println(readSonar(LEFT));
+    //     // Increment mode to reach next one
+    //     MODE++;
+    //     // Update display with new mode
+    //     dispMode();
+    //     }       
+    //   }
+    // }
+    // else
+    // {
+    //   //IR CODE
+    // }
+    // MODE++;
+    // dispMode();
+
     break;
   case 8:
     delay(60); 
@@ -467,19 +500,18 @@ void manualMode()
 // Move from main course to treasure 1, can we hardcode this?  seems straightforward
 void moveToTreasure1(double dist)
 {
-  rotate(100);
-  backupToTreasure(dist);
+  rotate(180); //145
+  backupToTreasure(dist+1);
 }
 
 void moveToTreasure2(){
   backupToTreasure(10);
-  rotate(130);
+  rotate(140); //130
   //backupToTreasure(19);
   drive(-200, -120);
   delay(350);
   drive(0,0);
   backupToTreasure(10);
-
 }
 
 // capture the IR beacon and move to next mode
