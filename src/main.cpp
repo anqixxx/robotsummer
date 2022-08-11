@@ -110,7 +110,7 @@ void UltrasonicTesting();
 /*
 Robot mode - Select which stage of operation the robot is in
 */
-int MODE = 11; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+int MODE = -1; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
 
 void setup()
 {
@@ -141,6 +141,8 @@ void setup()
 
 void loop()
 {
+  // irOn();
+
   // while(1){
   // //   outputCSV(analogRead(TAPE_FAR_L), analogRead(TAPE_L), analogRead(TAPE_R), analogRead(TAPE_FAR_R), 0);
   // claw_test_value();
@@ -177,7 +179,7 @@ void selectRobotMode()
 
   case 0:
     // Starting mode, line follow until first treasure is detected
-    while ((millis() - sonarTimeout) < 3500)
+    while ((millis() - sonarTimeout) < 4100)
     {
       lineFollow();
       
@@ -244,7 +246,7 @@ void selectRobotMode()
     treasureSequence(160, 10);
 
     drive(0, 0);
-
+    MODE = 11;
     break;
 
   case 6:
@@ -308,7 +310,7 @@ void selectRobotMode()
     rotate(90);
     backupToTreasure(dist);
     treasureSequence(180, 10);
-    // MODE++;
+    MODE = 11;
     // dispMode();
     break;
   case 9:
@@ -470,9 +472,12 @@ void moveToTreasure1(double dist)
 }
 
 void moveToTreasure2(){
-  //backupToTreasure(17);
-  rotate(-90);
+  backupToTreasure(10.2);
+  rotate(70);
   //backupToTreasure(19);
+  drive(-200, -120);
+  delay(350);
+  drive(0,0);
 }
 
 // capture the IR beacon and move to next mode
@@ -534,14 +539,14 @@ void IRReadingMode()
   int IRArrayValues[IR_ARRAY_SIZE];
 
   // Direction from robot to beacon -7 to 7
-  // int heading = 0;
-  // getIRArrayValues(IRArrayValues, TEN_KHZ, 100, SAMPLE_PERIOD, STANDARD_OFFSETS);
-  // heading = convertToHeading(IRArrayValues);
+  int heading = 0;
+  getIRArrayValues(IRArrayValues, TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS);
+  heading = convertToHeading(IRArrayValues);
 
-  for (int i = 0; i < IR_ARRAY_SIZE; i++)
-  {
-    IRArrayValues[i] = getQuickSignal(i);
-  }
+  // for (int i = 0; i < IR_ARRAY_SIZE; i++)
+  // {
+  //   IRArrayValues[i] = getQuickSignal(i);
+  // }
 
   char telemtery[60];
   sprintf(telemtery, "%d, %d, %d, %d, %d, %d, %d, %d",

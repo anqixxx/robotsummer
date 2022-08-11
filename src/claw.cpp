@@ -8,7 +8,7 @@
 #include "treasure.h"
 
 
-#define CLAW_REF_THRES 440
+#define CLAW_REF_THRES 470
 #define CLAW_MAG_THRES 700
 
 #define TREASURE_FOUND 1
