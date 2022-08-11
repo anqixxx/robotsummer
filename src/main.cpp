@@ -110,7 +110,7 @@ void UltrasonicTesting();
 /*
 Robot mode - Select which stage of operation the robot is in
 */
-int MODE = -1; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+int MODE = 11; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
 
 void setup()
 {
