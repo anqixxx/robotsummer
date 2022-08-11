@@ -47,12 +47,25 @@ void searchForBeacon(bool dir){
 // Left is positive angle
 // Encoder Rotation
 void rotate(int angle){
+
     int target = getEncoderPositionRight() + (angle*25)/90;
 
     int start = millis();
+    int speed = SLOW +30;
+    if(angle > 0){
     while (getEncoderPositionRight() < target && millis()-start < 2000){
-        drive (-SLOW-30, SLOW+30);
+        
+        drive (-speed, speed);
     }
+    } else {
+            while (getEncoderPositionRight() > target && millis()-start < 2000){
+        
+        drive (speed, -speed);
+    }
+    }
+
+
+
 
     drive(0,0);
 }

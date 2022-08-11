@@ -109,7 +109,7 @@ void UltrasonicTesting();
 /*
 Robot mode - Select which stage of operation the robot is in
 */
-int MODE = -1; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
+int MODE = 11; // Start the robot in its initial operating state from the start line   <=================== SELECT START MODE ===============
 
 void setup()
 {
@@ -140,9 +140,13 @@ void setup()
 
 void loop()
 {
-  // while(1){
-  //   outputCSV(analogRead(TAPE_FAR_L), analogRead(TAPE_L), analogRead(TAPE_R), analogRead(TAPE_FAR_R), 0);
-  // }
+  while(1){
+    outputCSV(analogRead(TAPE_FAR_L), analogRead(TAPE_L), analogRead(TAPE_R), analogRead(TAPE_FAR_R), 0);
+    delay (1000);
+    rotate (90);
+    delay(1000);
+    rotate(-90);
+  }
 
 
   // Check RC input
