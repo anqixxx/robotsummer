@@ -470,9 +470,9 @@ void moveToTreasure1(double dist)
 }
 
 void moveToTreasure2(){
-  backupToTreasure(17);
-  rotate(270);
-  backupToTreasure(15);
+  //backupToTreasure(17);
+  rotate(-90);
+  //backupToTreasure(19);
 }
 
 // capture the IR beacon and move to next mode
