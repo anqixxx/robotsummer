@@ -179,7 +179,7 @@ void selectRobotMode()
 
   case 0:
     // Starting mode, line follow until first treasure is detected
-    while ((millis() - sonarTimeout) < 4100)
+    while ((millis() - sonarTimeout) < 3500)
     {
       lineFollow();
       
@@ -243,7 +243,7 @@ void selectRobotMode()
     // From sonar signals, back up to treasure, pick up
     moveToTreasure2();
     
-    treasureSequence(160, 10);
+    treasureSequence(10, 180);
 
     drive(0, 0);
     MODE = 11;
@@ -467,17 +467,19 @@ void manualMode()
 // Move from main course to treasure 1, can we hardcode this?  seems straightforward
 void moveToTreasure1(double dist)
 {
-  rotate(90);
+  rotate(100);
   backupToTreasure(dist);
 }
 
 void moveToTreasure2(){
-  backupToTreasure(10.2);
-  rotate(70);
+  backupToTreasure(10);
+  rotate(130);
   //backupToTreasure(19);
   drive(-200, -120);
   delay(350);
   drive(0,0);
+  backupToTreasure(10);
+
 }
 
 // capture the IR beacon and move to next mode
@@ -602,6 +604,7 @@ void rcloop()
     resetRadioData(); // If connection is lost, reset the data. It prevents unwanted behavior, for example if a drone has a throttle up and we lose connection, it can keep flying unless we reset the values
   }
 }
+
 void setupRadio()
 {
   radio.begin();
@@ -612,6 +615,7 @@ void setupRadio()
   radio.startListening(); //  Set the module as receiver
   resetRadioData();
 }
+
 void resetRadioData()
 {
   // Reset the values when there is no radio connection - Set initial default values
@@ -647,7 +651,7 @@ void sonarDetect(int threshold){
         timer = millis();
 
         while (millis()-timer < 60){
-          lineFollow(.7);
+          lineFollow(.6);
         }
 
         sonarReading = readSonar(RIGHT);
@@ -665,6 +669,6 @@ void sonarDetect(int threshold){
     else
     {
       // Follow line
-      lineFollow();
+      lineFollow(.7);
     }
 }

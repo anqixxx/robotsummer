@@ -7,7 +7,7 @@
 #include "ir_sensors.h"
 #include "Encoders.h"
 
-#define OFFSET 5.8
+#define OFFSET 6
 
 
 // Executes a search for the IR beacon until one of the sensors gets a signal
@@ -51,7 +51,7 @@ void rotate(int angle){
     int target = getEncoderPositionRight() + (angle*25)/90;
 
     int start = millis();
-    int speed = SLOW +30;
+    int speed = SLOW +50;
     if(angle > 0){
     while (getEncoderPositionRight() < target && millis()-start < 2000){
         
