@@ -97,6 +97,7 @@ void captureBeacon();
 void followBeacon(int);
 void moveToTreasure4();
 void moveToTreasure2();
+void sonarDetect(int threshold);
 
 // Testing Functions (TO BE REMOVED EVENTUALLY!)
 void IRReadingMode();
@@ -141,7 +142,8 @@ void setup()
 void loop()
 {
   // while(1){
-  //   outputCSV(analogRead(TAPE_FAR_L), analogRead(TAPE_L), analogRead(TAPE_R), analogRead(TAPE_FAR_R), 0);
+  // //   outputCSV(analogRead(TAPE_FAR_L), analogRead(TAPE_L), analogRead(TAPE_R), analogRead(TAPE_FAR_R), 0);
+  // claw_test_value();
   // }
 
 
@@ -164,7 +166,6 @@ void loop()
 // select the set of functions matchingb the current operation mode
 void selectRobotMode()
 {
-  int sonarReading = 0;
   switch (MODE)
   {
   case -1:
@@ -182,42 +183,7 @@ void selectRobotMode()
       
     }
     
-    if ((millis() - timer) > 60)
-    {
-      timer = millis();
-      sonarReading = readSonar(RIGHT);
-      SERIAL_OUT.print("RIGHT SIDE SONAR: ");
-      SERIAL_OUT.println(sonarReading);
-
-
-      if (sonarReading < 35)
-      {
-        timer = millis();
-
-        while (millis()-timer < 60){
-          lineFollow(.7);
-        }
-
-        sonarReading = readSonar(RIGHT);
-
-        if (sonarReading < 35){
-        drive(0, 0);
-        SERIAL_OUT.println(readSonar(RIGHT));
-        // Increment mode to reach next one
-        MODE++;
-        // Update display with new mode
-        dispMode();
-        }       
-      }
-    }
-    else
-    {
-      // Follow line
-      lineFollow();
-    }
-
-    // Debug protocol
-    outputCSV(analogRead(TAPE_L), analogRead(TAPE_R), analogRead(TAPE_FAR_L), analogRead(TAPE_FAR_R), sonarReading);
+    sonarDetect(35);
     break;
 
   case 1:
@@ -254,22 +220,113 @@ void selectRobotMode()
     // Crosses Chicken Wire
     
     crossChickenwire();
+    sonarTimeout = millis();
 
     MODE++;
     dispMode();
     break;
 
   case 4:
+    while ((millis() - sonarTimeout) < 500)
+    {
+      lineFollow();
+    }    
     
+    sonarDetect(30);
+    // Debug protocol
+    outputCSV(analogRead(TAPE_L), analogRead(TAPE_R), analogRead(TAPE_FAR_L), analogRead(TAPE_FAR_R), 0);
+    break;
+
+  case 5:
+    // From sonar signals, back up to treasure, pick up
+    moveToTreasure2();
+    
+    treasureSequence(160, 10);
+
+    drive(0, 0);
+
+    break;
+
+  case 6:
+    // Use IR to determine when in line for the Arch
+    if (getQuickSignal(4) > 14 && getQuickSignal(5) > 14)
+    {
+      drive(0, 0);
+      MODE++;
+      dispMode();
+    }
+    else
+    {
+      // Debug protocol
+      outputCSV(analogRead(TAPE_L), analogRead(TAPE_R), data.pot1, data.pot2, 0);
+      // Rotate until signal is found
+      drive(-FAST,FAST);
+    }
+    break;
+  case 7:
+  // Drives forward until we reach treasure 3 
+  
     if ((millis() - timer) > 60)
     {
       timer = millis();
-      sonarReading = readSonar(RIGHT);
-      SERIAL_OUT.print("RIGHT SIDE SONAR: ");
+      int sonarReading = readSonar(LEFT);
+      SERIAL_OUT.print("LEFT SIDE SONAR: ");
       SERIAL_OUT.println(sonarReading);
 
 
-      if (sonarReading < 35)
+      if (sonarReading < 40)
+      {
+        timer = millis();
+
+        while (millis()-timer < 60){
+          lineFollow(.7);
+        }
+
+        sonarReading = readSonar(LEFT);
+
+        if (sonarReading < 40){
+        drive(0, 0);
+        SERIAL_OUT.println(readSonar(LEFT));
+        // Increment mode to reach next one
+        MODE++;
+        // Update display with new mode
+        dispMode();
+        }       
+      }
+    }
+    else
+    {
+      //IR CODE
+    }
+    MODE++;
+    dispMode();
+    break;
+  case 8:
+    delay(60); 
+    dist = readSonar(LEFT);
+
+    rotate(90);
+    backupToTreasure(dist);
+    treasureSequence(180, 10);
+    // MODE++;
+    // dispMode();
+    break;
+  case 9:
+  // Rotate until we find IR heading again
+    MODE++;
+    break;
+  case 10:
+  // Find Treasure 4
+    // Drives forward until we reach treasure 3 
+    if ((millis() - timer) > 60)
+    {
+      timer = millis();
+      int sonarReading = readSonar(RIGHT);
+      SERIAL_OUT.print("LEFT SIDE SONAR: ");
+      SERIAL_OUT.println(sonarReading);
+
+
+      if (sonarReading < 40)
       {
         timer = millis();
 
@@ -279,7 +336,7 @@ void selectRobotMode()
 
         sonarReading = readSonar(RIGHT);
 
-        if (sonarReading < 35){
+        if (sonarReading < 40){
         drive(0, 0);
         SERIAL_OUT.println(readSonar(RIGHT));
         // Increment mode to reach next one
@@ -291,28 +348,15 @@ void selectRobotMode()
     }
     else
     {
-      // Follow line
-      lineFollow();
+      //IR CODE
     }
-
-    // Debug protocol
-    outputCSV(analogRead(TAPE_L), analogRead(TAPE_R), analogRead(TAPE_FAR_L), analogRead(TAPE_FAR_R), sonarReading);
     break;
-
-  case 5:
-        // From sonar signals, back up to treasure, pick up
-    // double dist;
-    // delay(60); // change to 60 later? Leave as is for now as this is working 
-    // dist = readSonar(RIGHT);
-
-    moveToTreasure2();
-    
-    treasureSequence(160, 10);
-
+  case 11:
+    // outputCSV(getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS),getHeadingToBeacon(ONE_KHZ, ONE_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS),0,0,0);
+    IRReadingMode(); // debug mode
     break;
-
-  case 6:
-      // Check for a ping on the left IR beacon LED to determine when in position
+  case 12:
+    // Check for a ping on the left IR beacon LED to determine when in position
     if (getQuickSignal(1) > 10)
     {
       drive(0, 0);
@@ -327,27 +371,10 @@ void selectRobotMode()
       lineFollow();
     }
     break;
-  case 7:
-    MODE++;
-    dispMode();
-    break;
-  case 8:
-    MODE++;
-    dispMode();
-    break;
-  case 9:
-    MODE++;
-    break;
-  case 10:
-    break;
-  case 11:
-    // outputCSV(getHeadingToBeacon(TEN_KHZ, TEN_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS),getHeadingToBeacon(ONE_KHZ, ONE_KHZ_READINGS, SAMPLE_PERIOD, STANDARD_OFFSETS),0,0,0);
-    IRReadingMode(); // debug mode
-    break;
-  case 12:
+  case 13:
     SERIAL_OUT.println("End of automation sequence");
     break;
-  case 13:
+  case 14:
 
     break;
 
@@ -443,7 +470,9 @@ void moveToTreasure1(double dist)
 }
 
 void moveToTreasure2(){
-  rotate(90);
+  backupToTreasure(17);
+  rotate(270);
+  backupToTreasure(15);
 }
 
 // capture the IR beacon and move to next mode
@@ -484,8 +513,8 @@ void moveToTreasure4()
   }
 }
 
-// Follows a set heading (probably stable in the -3 to 3 range) using PID control.
-
+// Follows a set heading (probably stable in the -7 to 7 range) using PID control.
+// Is this supposed to be 0 to 7
 void followBeacon(int heading)
 {
   int averageSpeed = 100;
@@ -595,4 +624,42 @@ void resetRadioData()
   data.button2 = 1;
   data.button3 = 1;
   data.button4 = 1;
+}
+
+// Detects treasures while line following
+void sonarDetect(int threshold){
+  
+    if ((millis() - timer) > 60)
+    {
+      timer = millis();
+      int sonarReading = readSonar(RIGHT);
+      SERIAL_OUT.print("RIGHT SIDE SONAR: ");
+      SERIAL_OUT.println(sonarReading);
+
+
+      if (sonarReading < threshold)
+      {
+        timer = millis();
+
+        while (millis()-timer < 60){
+          lineFollow(.7);
+        }
+
+        sonarReading = readSonar(RIGHT);
+
+        if (sonarReading < threshold){
+        drive(0, 0);
+        SERIAL_OUT.println(readSonar(RIGHT));
+        // Increment mode to reach next one
+        MODE++;
+        // Update display with new mode
+        dispMode();
+        }       
+      }
+    }
+    else
+    {
+      // Follow line
+      lineFollow();
+    }
 }

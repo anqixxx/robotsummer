@@ -85,8 +85,6 @@ int getUnfilteredIRArrayValue(int sel)
   
 }
 
-
-
 // Converts the filtered array values to a heading, heading is from -7 to 7 with 0 being straight ahead
 // returns indicator value as a result if it encounters more than two pins that are above the threshold, indicating error
 double convertToHeading(int SIG[])

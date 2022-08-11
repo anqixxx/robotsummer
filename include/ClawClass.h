@@ -13,7 +13,8 @@ class ClawClass
     void reposition(int pos);
     int getReflectance();
     int getHall();
-
+    void irBoostOn();
+    void irBoostOff();
 
     int reflectance;
     int hall;

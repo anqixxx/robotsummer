@@ -102,6 +102,7 @@
 #define CLAW_MAG A3
 #define CLAW_OPEN 140 
 #define CLAW_CLOSE 50
+#define IR_BOOST 38 // pin 38
 
 
 // Sonars

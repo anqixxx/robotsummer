@@ -22,4 +22,8 @@ void stopForwardPancakeMotor();
 
 void arm_servo_pos(int position);
 
+void claw_test_value();
+
+void irOn();
+
 #endif

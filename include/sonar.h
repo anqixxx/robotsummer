@@ -5,5 +5,6 @@
 
 void setupSonar();
 double readSonar(int sonarID);
+bool treasure_detect(int sonarID, int threshold);
 
 #endif
