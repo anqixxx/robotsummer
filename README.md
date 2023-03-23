@@ -14,5 +14,7 @@ A repository for code created for robot summer in ENPH 253!
 | serial_coms.h | serial_coms.cpp | Allows for communication between bluetooth and our Robot! (Due to this, it has access to more libraries than other source files) |
 | rc_reciever.h*  | rc_reciever.cpp*  | Allows for controlling the robot with an RC Controller, testing mode only  |
 
+Video of robot picking up treasures: https://drive.google.com/file/d/1E-0XAfuZY4gkAFgjbmka8zm1gYZMEI6N/view?usp=sharing 
+
 * Note, will  also utlize nRF24L01.h, RF24_config.h, RF24.h, and RF24.cpp, all taken online from the TMRh20/RF24 library, https://github.com/tmrh20/RF24/
 
